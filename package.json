@@ -1,0 +1,28 @@
+{
+  "name": "singbox-limiter",
+  "version": "1.0.0",
+  "description": "SingBox client management with traffic limiting",
+  "main": "server/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "init-cert": "node server/utils/cert-generator.js"
+  },
+  "keywords": [
+    "singbox",
+    "proxy",
+    "traffic-limit"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "better-sqlite3": "^9.2.2",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "dockerode": "^4.0.2",
+    "cron": "^3.1.6",
+    "cors": "^2.8.5"
+  }
+}

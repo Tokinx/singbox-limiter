@@ -1,0 +1,39 @@
+前端参考/
+
+node_modules/
+.env
+.env.local
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# SQLite 数据库
+*.db
+*.sqlite
+*.sqlite3
+
+# 证书文件
+certs/*.pem
+certs/*.key
+certs/*.crt
+
+# sing-box 配置
+configs/clients/*.json
+
+# Docker volumes
+data/
+volumes/
+
+# 临时文件
+tmp/
+temp/
+.DS_Store
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.iml

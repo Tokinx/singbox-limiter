@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  singbox-limiter:
+    build: .
+    container_name: singbox-limiter
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - JWT_SECRET=${JWT_SECRET:-change_this_secret}
+      - SERVER_IP=${SERVER_IP:-your_server_ip}
+      - PORT=3000
+      - HOST=0.0.0.0
+      - TRAFFIC_MONITOR_INTERVAL=${TRAFFIC_MONITOR_INTERVAL:-60}
+    volumes:
+      # 持久化数据
+      - ./data:/app/data
+      - ./certs:/app/certs
+      - ./configs:/app/configs
+      # Docker Socket（用于监控容器流量）
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - singbox-network
+
+networks:
+  singbox-network:
+    driver: bridge

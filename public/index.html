@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SingBox Limiter - API 文档</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      text-align: center;
+    }
+    .header h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+    .header p {
+      opacity: 0.9;
+      font-size: 16px;
+    }
+    .content {
+      padding: 40px;
+    }
+    .section {
+      margin-bottom: 40px;
+    }
+    .section h2 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #667eea;
+    }
+    .endpoint {
+      background: #f8f9fa;
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+    .endpoint .method {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 12px;
+      margin-right: 10px;
+    }
+    .method.get { background: #28a745; color: white; }
+    .method.post { background: #007bff; color: white; }
+    .method.put { background: #ffc107; color: #333; }
+    .method.delete { background: #dc3545; color: white; }
+    .endpoint .path {
+      font-family: 'Courier New', monospace;
+      font-size: 16px;
+      color: #333;
+    }
+    .endpoint .desc {
+      margin-top: 10px;
+      color: #666;
+      line-height: 1.6;
+    }
+    pre {
+      background: #2d3748;
+      color: #f7fafc;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+    .feature-list {
+      list-style: none;
+      padding: 0;
+    }
+    .feature-list li {
+      padding: 10px 0;
+      padding-left: 30px;
+      position: relative;
+    }
+    .feature-list li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #28a745;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .info-box {
+      background: #e7f3ff;
+      border: 1px solid #2196F3;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .info-box h3 {
+      color: #1976D2;
+      margin-bottom: 10px;
+    }
+    .warning-box {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .warning-box h3 {
+      color: #856404;
+      margin-bottom: 10px;
+    }
+    .footer {
+      text-align: center;
+      padding: 30px;
+      color: #666;
+      background: #f8f9fa;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🚀 SingBox Limiter</h1>
+      <p>基于 Docker 的 SingBox 客户端管理系统</p>
+    </div>
+
+    <div class="content">
+      <div class="section">
+        <h2>功能特性</h2>
+        <ul class="feature-list">
+          <li>客户端管理（创建/编辑/删除）</li>
+          <li>实时流量监控（Docker API）</li>
+          <li>流量限制和自动停用</li>
+          <li>到期时间管理</li>
+          <li>流量重置规则（月度/自定义）</li>
+          <li>分享页面生成</li>
+          <li>Reality + Hysteria2 双协议支持</li>
+        </ul>
+      </div>
+
+      <div class="info-box">
+        <h3>📍 默认管理员账号</h3>
+        <p><strong>用户名:</strong> admin</p>
+        <p><strong>密码:</strong> admin</p>
+        <p style="margin-top: 10px; color: #d32f2f;">⚠️ 请立即修改默认密码！</p>
+      </div>
+
+      <div class="section">
+        <h2>API 端点</h2>
+
+        <h3 style="margin: 30px 0 20px; color: #555;">认证接口</h3>
+        <div class="endpoint">
+          <span class="method post">POST</span>
+          <span class="path">/api/auth/login</span>
+          <div class="desc">管理员登录</div>
+          <pre>{
+  "username": "admin",
+  "password": "your_password"
+}</pre>
+        </div>
+
+        <h3 style="margin: 30px 0 20px; color: #555;">客户端管理</h3>
+        <div class="endpoint">
+          <span class="method get">GET</span>
+          <span class="path">/api/clients</span>
+          <div class="desc">获取所有客户端列表（需要 Token）</div>
+        </div>
+
+        <div class="endpoint">
+          <span class="method post">POST</span>
+          <span class="path">/api/clients</span>
+          <div class="desc">创建新客户端</div>
+          <pre>{
+  "name": "客户端名称",
+  "limitGb": 10,
+  "resetDay": 1,
+  "expiryDate": "2024-12-31",
+  "realityPort": 20443,
+  "hysteriaPort": 20080,
+  "sni": "www.google.com"
+}</pre>
+        </div>
+
+        <div class="endpoint">
+          <span class="method get">GET</span>
+          <span class="path">/api/clients/:id</span>
+          <div class="desc">获取客户端详情</div>
+        </div>
+
+        <div class="endpoint">
+          <span class="method put">PUT</span>
+          <span class="path">/api/clients/:id</span>
+          <div class="desc">更新客户端配置</div>
+        </div>
+
+        <div class="endpoint">
+          <span class="method delete">DELETE</span>
+          <span class="path">/api/clients/:id</span>
+          <div class="desc">删除客户端（包括容器）</div>
+        </div>
+
+        <div class="endpoint">
+          <span class="method get">GET</span>
+          <span class="path">/api/clients/:id/traffic?hours=24</span>
+          <div class="desc">获取流量历史（默认 24 小时）</div>
+        </div>
+
+        <div class="endpoint">
+          <span class="method post">POST</span>
+          <span class="path">/api/clients/:id/reset-traffic</span>
+          <div class="desc">手动重置流量</div>
+        </div>
+
+        <div class="endpoint">
+          <span class="method get">GET</span>
+          <span class="path">/api/clients/:id/urls</span>
+          <div class="desc">获取连接 URL（Reality + Hysteria2）</div>
+        </div>
+
+        <h3 style="margin: 30px 0 20px; color: #555;">分享页面（公开）</h3>
+        <div class="endpoint">
+          <span class="method get">GET</span>
+          <span class="path">/api/share/:token</span>
+          <div class="desc">获取分享页面数据（无需认证）</div>
+        </div>
+      </div>
+
+      <div class="warning-box">
+        <h3>⚙️ 使用说明</h3>
+        <p>1. 所有客户端 API（除分享页面）需要在 Header 中携带 Token：</p>
+        <pre style="background: #fff; color: #333; border: 1px solid #ddd;">Authorization: Bearer &lt;your_token&gt;</pre>
+        <p style="margin-top: 15px;">2. 流量监控依赖 Docker Socket，确保服务器可访问 <code>/var/run/docker.sock</code></p>
+        <p>3. 首次使用请先运行 <code>npm run init-cert</code> 生成证书</p>
+      </div>
+
+      <div class="section">
+        <h2>快速开始</h2>
+        <pre style="background: #2d3748;">npm install
+cp .env.example .env
+# 编辑 .env 修改配置
+npm run init-cert
+npm start</pre>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>SingBox Limiter v1.0.0</p>
+      <p style="margin-top: 10px; font-size: 14px;">
+        查看完整文档: <a href="/README.md" style="color: #667eea;">README.md</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>
