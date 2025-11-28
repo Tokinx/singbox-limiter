@@ -44,8 +44,8 @@ COPY --from=backend-builder /app/node_modules ./node_modules
 COPY server/ ./server/
 COPY package*.json ./
 
-# 从前端构建阶段复制构建产物
-COPY --from=frontend-builder /app/public ./public
+# 从前端构建阶段复制构建产物 (Vite 输出到 dist 目录)
+COPY --from=frontend-builder /app/frontend/dist ./public
 
 # 创建必要的目录
 RUN mkdir -p data certs configs/clients
