@@ -9,33 +9,50 @@ if (!existsSync(CONFIG_DIR)) {
 }
 
 /**
- * 生成 Reality 服务器配置
+ * 生成 Reality Guard 配置（防探测）
  */
-export function generateRealityConfig(client) {
+export function generateRealityGuardConfig(client) {
+  const guardPort = client.reality_port;
+  const realityPort = guardPort + 1; // 内部端口
+
   return {
-    tag: `reality-${client.id}`,
-    type: 'vless',
-    listen: '::',
-    listen_port: client.reality_port,
-    users: [
-      {
-        uuid: client.uuid,
-        flow: client.flow
-      }
-    ],
-    tls: {
-      enabled: true,
-      server_name: client.sni,
-      reality: {
+    guard: {
+      type: 'direct',
+      tag: 'reality-guard',
+      listen: '::',
+      listen_port: guardPort,
+      network: 'tcp',
+      override_address: '127.0.0.1',
+      override_port: realityPort
+    },
+    reality: {
+      tag: `reality-${client.id}`,
+      type: 'vless',
+      listen: '127.0.0.1',
+      listen_port: realityPort,
+      users: [
+        {
+          uuid: client.uuid,
+          flow: client.flow
+        }
+      ],
+      tls: {
         enabled: true,
-        handshake: {
-          server: client.sni,
-          server_port: 443
-        },
-        private_key: client.private_key,
-        short_id: [client.short_id]
+        server_name: client.sni,
+        alpn: ['h2', 'http/1.1'],
+        reality: {
+          enabled: true,
+          handshake: {
+            server: client.sni,
+            server_port: 443
+          },
+          private_key: client.private_key,
+          short_id: [client.short_id],
+          max_time_difference: '1m'
+        }
       }
-    }
+    },
+    realityPort
   };
 }
 
@@ -55,6 +72,7 @@ export function generateHysteria2Config(client) {
     ],
     tls: {
       enabled: true,
+      server_name: client.sni,
       alpn: ['h3'],
       certificate_path: '/etc/sing-box/server.pem',
       key_path: '/etc/sing-box/server.key'
@@ -66,13 +84,15 @@ export function generateHysteria2Config(client) {
  * 生成完整的 sing-box 配置文件
  */
 export function generateSingBoxConfig(client) {
+  const realityConfig = generateRealityGuardConfig(client);
+
   const config = {
     log: {
-      level: 'info',
-      timestamp: true
+      level: 'info'
     },
     inbounds: [
-      generateRealityConfig(client),
+      realityConfig.guard,
+      realityConfig.reality,
       generateHysteria2Config(client)
     ],
     outbounds: [
@@ -84,7 +104,29 @@ export function generateSingBoxConfig(client) {
         type: 'block',
         tag: 'block'
       }
-    ]
+    ],
+    route: {
+      rules: [
+        {
+          action: 'sniff',
+          inbound: ['reality-guard'],
+          sniffer: ['tls'],
+          timeout: '300ms'
+        },
+        {
+          action: 'route',
+          inbound: ['reality-guard'],
+          domain: [client.sni],
+          outbound: 'direct'
+        },
+        {
+          action: 'reject',
+          inbound: ['reality-guard'],
+          method: 'drop'
+        }
+      ],
+      final: 'direct'
+    }
   };
 
   // 保存配置文件
