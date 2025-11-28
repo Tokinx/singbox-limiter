@@ -9,6 +9,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: './index.html',
+        dashboard: './dashboard.html',
+        client: './client.html',
         share: './share.html'
       }
     }
