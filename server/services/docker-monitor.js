@@ -1,5 +1,5 @@
 import Docker from 'dockerode';
-import { updateClientTraffic, getAllClients } from './database.js';
+import { updateClientTraffic, getAllClients } from '../utils/database.js';
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 
