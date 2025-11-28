@@ -15,6 +15,7 @@ services:
       - PORT=3000
       - HOST=0.0.0.0
       - TRAFFIC_MONITOR_INTERVAL=${TRAFFIC_MONITOR_INTERVAL:-60}
+      - HOST_DATA_DIR=${HOST_DATA_DIR:-/home/singbox-limiter}
     volumes:
       # 持久化数据
       - ./data:/app/data

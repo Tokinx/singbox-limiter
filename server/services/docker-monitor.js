@@ -3,6 +3,9 @@ import { updateClientTraffic, getAllClients } from '../utils/database.js';
 
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 
+// 宿主机数据目录（用于容器卷挂载）
+const HOST_DATA_DIR = process.env.HOST_DATA_DIR || '/home/singbox-limiter';
+
 // 存储上一次的流量数据，用于计算增量
 const lastStats = new Map();
 
@@ -160,9 +163,9 @@ export async function createClientContainer(client) {
           [`${client.hysteria_port}/udp`]: [{ HostPort: `${client.hysteria_port}` }]
         },
         Binds: [
-          `${process.cwd()}/configs/clients/${client.id}.json:/etc/sing-box/config.json:ro`,
-          `${process.cwd()}/certs/server.pem:/etc/sing-box/server.pem:ro`,
-          `${process.cwd()}/certs/server.key:/etc/sing-box/server.key:ro`
+          `${HOST_DATA_DIR}/configs/clients/${client.id}.json:/etc/sing-box/config.json:ro`,
+          `${HOST_DATA_DIR}/certs/server.pem:/etc/sing-box/server.pem:ro`,
+          `${HOST_DATA_DIR}/certs/server.key:/etc/sing-box/server.key:ro`
         ],
         CapAdd: ['NET_RAW']
       },
