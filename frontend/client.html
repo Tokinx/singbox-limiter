@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>客户端详情 - SingBox Limiter</title>
+  <link rel="stylesheet" href="/src/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="header">
+    <div class="header-content">
+      <div class="logo" style="cursor: pointer;" onclick="window.location.href='/dashboard.html'">← SingBox Limiter</div>
+      <button class="btn btn-secondary" onclick="logout()">退出登录</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <div id="clientDetail"></div>
+  </div>
+
+  <script type="module">
+    import { api, getToken, clearToken, formatBytes, formatDate, showToast, copyToClipboard, confirm } from './src/utils/api.js';
+
+    if (!getToken()) {
+      window.location.href = '/';
+    }
+
+    window.logout = function() {
+      if (window.confirm('确定要退出登录吗？')) {
+        clearToken();
+        window.location.href = '/';
+      }
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const clientId = params.get('id');
+
+    if (!clientId) {
+      window.location.href = '/dashboard.html';
+    }
+
+    let client = null;
+    let trafficChart = null;
+
+    async function loadClient() {
+      try {
+        client = await api.getClient(clientId);
+        const traffic = await api.getTraffic(clientId, 24);
+        renderClient(client, traffic);
+      } catch (error) {
+        showToast('加载失败: ' + error.message);
+      }
+    }
+
+    function renderClient(client, traffic) {
+      const container = document.getElementById('clientDetail');
+      const usagePercent = client.limit_bytes > 0 ? (client.used_bytes / client.limit_bytes) * 100 : 0;
+      const shareUrl = `${window.location.origin}/share.html#${client.share_token}`;
+
+      container.innerHTML = `
+        <div class="card">
+          <h2 style="font-size: 24px; margin-bottom: 20px;">${client.name}</h2>
+
+          <div class="grid grid-2" style="margin-bottom: 30px;">
+            <div>
+              <div style="font-size: 13px; color: var(--gray-500); margin-bottom: 8px;">流量使用</div>
+              <div style="font-size: 28px; font-weight: 700;">${formatBytes(client.used_bytes)}</div>
+              <div style="font-size: 14px; color: var(--gray-600); margin-top: 4px;">
+                / ${client.limit_bytes > 0 ? formatBytes(client.limit_bytes) : '无限制'}
+              </div>
+              ${client.limit_bytes > 0 ? `
+                <div class="progress-bar" style="margin-top: 12px; height: 10px;">
+                  <div class="progress-fill" style="width: ${Math.min(100, usagePercent)}%; background: ${usagePercent > 90 ? 'var(--danger)' : 'var(--primary)'}"></div>
+                </div>
+              ` : ''}
+            </div>
+
+            <div>
+              <div style="font-size: 13px; color: var(--gray-500); margin-bottom: 8px;">状态信息</div>
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div>
+                  状态: ${client.active ? '<span class="badge badge-success">启用</span>' : '<span class="badge badge-danger">停用</span>'}
+                </div>
+                <div>
+                  容器: ${client.containerRunning ? '<span class="badge badge-success">运行中</span>' : '<span class="badge badge-danger">已停止</span>'}
+                </div>
+                <div>到期: ${formatDate(client.expiry_date)}</div>
+                <div>重置日: 每月 ${client.reset_day} 号</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-bottom: 30px; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="getUrls()">📋 获取连接</button>
+            <button class="btn btn-success" onclick="shareClient()">🔗 分享页面</button>
+            <button class="btn btn-secondary" onclick="resetTraffic()">🔄 重置流量</button>
+            <button class="btn btn-secondary" onclick="toggleActive()">${client.active ? '停用' : '启用'}</button>
+          </div>
+
+          <h3 style="margin-bottom: 16px;">流量趋势（最近 24 小时）</h3>
+          <canvas id="trafficChart" style="max-height: 300px;"></canvas>
+        </div>
+      `;
+
+      renderChart(traffic);
+    }
+
+    function renderChart(traffic) {
+      const ctx = document.getElementById('trafficChart');
+
+      if (trafficChart) {
+        trafficChart.destroy();
+      }
+
+      const labels = traffic.map(t => new Date(t.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }));
+      const uploads = traffic.map(t => t.upload_bytes / 1024 / 1024);
+      const downloads = traffic.map(t => t.download_bytes / 1024 / 1024);
+
+      trafficChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: '上传 (MB)',
+              data: uploads,
+              borderColor: 'rgb(239, 68, 68)',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              fill: true
+            },
+            {
+              label: '下载 (MB)',
+              data: downloads,
+              borderColor: 'rgb(59, 130, 246)',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    window.getUrls = async function() {
+      try {
+        const urls = await api.getUrls(clientId);
+        const modal = document.createElement('div');
+        modal.innerHTML = `
+          <div class="modal-overlay" onclick="this.parentElement.remove()">
+            <div class="modal" onclick="event.stopPropagation()">
+              <div class="modal-header">
+                <h2>连接 URL</h2>
+                <button onclick="this.closest('.modal-overlay').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+              </div>
+              <div class="modal-body">
+                <div class="form-group">
+                  <label class="label">Reality</label>
+                  <div style="display: flex; gap: 8px;">
+                    <input type="text" class="input" value="${urls.reality}" readonly id="realityUrl" />
+                    <button class="btn btn-secondary" onclick="copyUrl('realityUrl')">复制</button>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="label">Hysteria2</label>
+                  <div style="display: flex; gap: 8px;">
+                    <input type="text" class="input" value="${urls.hysteria2}" readonly id="hy2Url" />
+                    <button class="btn btn-secondary" onclick="copyUrl('hy2Url')">复制</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      } catch (error) {
+        showToast('获取失败: ' + error.message);
+      }
+    };
+
+    window.copyUrl = async function(id) {
+      const input = document.getElementById(id);
+      await copyToClipboard(input.value);
+      showToast('已复制到剪贴板');
+    };
+
+    window.shareClient = async function() {
+      const shareUrl = `${window.location.origin}/share.html#${client.share_token}`;
+      await copyToClipboard(shareUrl);
+      showToast('分享链接已复制: ' + shareUrl);
+    };
+
+    window.resetTraffic = async function() {
+      if (!window.confirm('确定要重置流量吗？')) return;
+
+      try {
+        await api.resetTraffic(clientId);
+        showToast('重置成功');
+        loadClient();
+      } catch (error) {
+        showToast('重置失败: ' + error.message);
+      }
+    };
+
+    window.toggleActive = async function() {
+      const newState = !client.active;
+
+      try {
+        await api.updateClient(clientId, { active: newState });
+        showToast(newState ? '已启用' : '已停用');
+        loadClient();
+      } catch (error) {
+        showToast('操作失败: ' + error.message);
+      }
+    };
+
+    loadClient();
+    setInterval(loadClient, 30000);
+  </script>
+</body>
+</html>

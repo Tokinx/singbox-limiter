@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>控制面板 - SingBox Limiter</title>
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <!-- 头部 -->
+  <div class="header">
+    <div class="header-content">
+      <div class="logo">SingBox Limiter</div>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <span style="color: var(--gray-600); font-size: 14px;" id="username"></span>
+        <button class="btn btn-secondary" onclick="logout()">退出登录</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- 统计卡片 -->
+    <div class="grid grid-3" id="stats">
+      <div class="stat-card">
+        <h3>总客户端</h3>
+        <div class="value" id="totalClients">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>活跃客户端</h3>
+        <div class="value" id="activeClients">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>总流量使用</h3>
+        <div class="value" id="totalTraffic">0 GB</div>
+      </div>
+    </div>
+
+    <!-- 客户端列表 -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-size: 20px; font-weight: 600;">客户端列表</h2>
+        <button class="btn btn-primary" onclick="showCreateModal()">
+          <span>➕</span> 创建客户端
+        </button>
+      </div>
+
+      <div id="clientsTable">
+        <div style="text-align: center; padding: 40px;">
+          <div class="loading" style="margin: 0 auto;"></div>
+          <p style="margin-top: 12px; color: var(--gray-500);">加载中...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 创建客户端弹窗 -->
+  <div id="createModal" style="display: none;"></div>
+
+  <script type="module">
+    import { api, getToken, clearToken, formatBytes, formatDate, showToast, copyToClipboard, confirm } from './src/utils/api.js';
+
+    // 检查登录状态
+    if (!getToken()) {
+      window.location.href = '/';
+    }
+
+    let clients = [];
+
+    // 显示用户名（从 Token 解析）
+    try {
+      const token = getToken();
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      document.getElementById('username').textContent = payload.username;
+    } catch (e) {
+      console.error('Token 解析失败');
+    }
+
+    // 退出登录
+    window.logout = function() {
+      if (window.confirm('确定要退出登录吗？')) {
+        clearToken();
+        window.location.href = '/';
+      }
+    };
+
+    // 加载客户端列表
+    async function loadClients() {
+      try {
+        clients = await api.getClients();
+        renderClients();
+        updateStats();
+      } catch (error) {
+        showToast('加载客户端失败: ' + error.message);
+      }
+    }
+
+    // 渲染客户端列表
+    function renderClients() {
+      const container = document.getElementById('clientsTable');
+
+      if (clients.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+            <p>暂无客户端</p>
+            <p style="font-size: 14px; margin-top: 8px;">点击右上角按钮创建第一个客户端</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <table class="table">
+          <thead>
+            <tr>
+              <th>名称</th>
+              <th>流量使用</th>
+              <th>状态</th>
+              <th>到期时间</th>
+              <th>容器状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${clients.map(client => {
+              const usagePercent = client.limit_bytes > 0
+                ? Math.min(100, (client.used_bytes / client.limit_bytes) * 100)
+                : 0;
+
+              const isExpired = client.expiry_date && new Date(client.expiry_date) < new Date();
+
+              return `
+                <tr>
+                  <td>
+                    <div style="font-weight: 500;">${client.name}</div>
+                    <div style="font-size: 12px; color: var(--gray-500);">${client.email || '-'}</div>
+                  </td>
+                  <td>
+                    <div>${formatBytes(client.used_bytes)} / ${client.limit_bytes > 0 ? formatBytes(client.limit_bytes) : '无限制'}</div>
+                    ${client.limit_bytes > 0 ? `
+                      <div class="progress-bar" style="margin-top: 4px;">
+                        <div class="progress-fill" style="width: ${usagePercent}%; background: ${usagePercent > 90 ? 'var(--danger)' : 'var(--primary)'}"></div>
+                      </div>
+                    ` : ''}
+                  </td>
+                  <td>
+                    ${client.active
+                      ? '<span class="badge badge-success">启用</span>'
+                      : '<span class="badge badge-danger">停用</span>'}
+                    ${isExpired ? '<span class="badge badge-warning" style="margin-left: 4px;">已过期</span>' : ''}
+                  </td>
+                  <td>${formatDate(client.expiry_date)}</td>
+                  <td>
+                    ${client.containerRunning
+                      ? '<span class="badge badge-success">运行中</span>'
+                      : '<span class="badge badge-danger">已停止</span>'}
+                  </td>
+                  <td>
+                    <div style="display: flex; gap: 8px;">
+                      <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="viewClient('${client.id}')">详情</button>
+                      <button class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="deleteClient('${client.id}', '${client.name}')">删除</button>
+                    </div>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // 更新统计数据
+    function updateStats() {
+      const total = clients.length;
+      const active = clients.filter(c => c.active).length;
+      const totalBytes = clients.reduce((sum, c) => sum + c.used_bytes, 0);
+
+      document.getElementById('totalClients').textContent = total;
+      document.getElementById('activeClients').textContent = active;
+      document.getElementById('totalTraffic').textContent = formatBytes(totalBytes);
+    }
+
+    // 查看客户端详情
+    window.viewClient = function(id) {
+      window.location.href = `/client.html?id=${id}`;
+    };
+
+    // 删除客户端
+    window.deleteClient = async function(id, name) {
+      if (!window.confirm(`确定要删除客户端 "${name}" 吗？\n\n此操作将：\n- 删除客户端配置\n- 停止并删除 Docker 容器\n- 删除所有流量历史记录\n\n此操作不可撤销！`)) {
+        return;
+      }
+
+      try {
+        await api.deleteClient(id);
+        showToast('删除成功');
+        loadClients();
+      } catch (error) {
+        showToast('删除失败: ' + error.message);
+      }
+    };
+
+    // 显示创建弹窗
+    window.showCreateModal = function() {
+      const modal = document.getElementById('createModal');
+      modal.style.display = 'block';
+      modal.innerHTML = `
+        <div class="modal-overlay" onclick="closeModal()">
+          <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+              <h2>创建客户端</h2>
+              <button onclick="closeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--gray-400);">&times;</button>
+            </div>
+            <form id="createForm" onsubmit="handleCreate(event)">
+              <div class="modal-body">
+                <div class="form-group">
+                  <label class="label">客户端名称 *</label>
+                  <input type="text" name="name" class="input" placeholder="例如: 用户A" required autofocus />
+                </div>
+                <div class="form-group">
+                  <label class="label">邮箱</label>
+                  <input type="email" name="email" class="input" placeholder="user@example.com" />
+                </div>
+                <div class="grid grid-2">
+                  <div class="form-group">
+                    <label class="label">流量限制 (GB)</label>
+                    <input type="number" name="limitGb" class="input" placeholder="0 = 无限制" min="0" value="10" />
+                  </div>
+                  <div class="form-group">
+                    <label class="label">每月重置日</label>
+                    <input type="number" name="resetDay" class="input" min="1" max="31" value="1" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="label">到期时间</label>
+                  <input type="date" name="expiryDate" class="input" />
+                </div>
+                <div class="grid grid-2">
+                  <div class="form-group">
+                    <label class="label">Reality 端口 *</label>
+                    <input type="number" name="realityPort" class="input" value="20443" required />
+                  </div>
+                  <div class="form-group">
+                    <label class="label">Hysteria2 端口 *</label>
+                    <input type="number" name="hysteriaPort" class="input" value="20080" required />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="label">SNI</label>
+                  <input type="text" name="sni" class="input" value="www.google.com" />
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                <button type="submit" class="btn btn-primary" id="createBtn">
+                  <span id="createText">创建</span>
+                  <span id="createLoader" class="loading" style="display: none;"></span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+    };
+
+    // 关闭弹窗
+    window.closeModal = function() {
+      document.getElementById('createModal').style.display = 'none';
+    };
+
+    // 处理创建
+    window.handleCreate = async function(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+
+      // 转换数据类型
+      data.limitGb = parseInt(data.limitGb) || 0;
+      data.resetDay = parseInt(data.resetDay) || 1;
+      data.realityPort = parseInt(data.realityPort);
+      data.hysteriaPort = parseInt(data.hysteriaPort);
+
+      const btn = document.getElementById('createBtn');
+      const text = document.getElementById('createText');
+      const loader = document.getElementById('createLoader');
+
+      btn.disabled = true;
+      text.style.display = 'none';
+      loader.style.display = 'inline-block';
+
+      try {
+        await api.createClient(data);
+        showToast('创建成功');
+        closeModal();
+        loadClients();
+      } catch (error) {
+        showToast('创建失败: ' + error.message);
+        btn.disabled = false;
+        text.style.display = 'inline';
+        loader.style.display = 'none';
+      }
+    };
+
+    // 初始加载
+    loadClients();
+
+    // 定时刷新
+    setInterval(loadClients, 30000);
+  </script>
+</body>
+</html>

@@ -11,6 +11,7 @@ import shareRoutes from './routes/share.js';
 
 // 导入中间件
 import { authMiddleware } from './middleware/auth.js';
+import { apiRateLimiter } from './middleware/rate-limiter.js';
 
 // 导入服务
 import { initDatabase } from './utils/database.js';
@@ -39,6 +40,9 @@ app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} ${req.method} ${req.path}`);
   next();
 });
+
+// API 频率限制
+app.use('/api', apiRateLimiter);
 
 // API 路由（应用认证中间件）
 app.use('/api/auth', authRoutes);

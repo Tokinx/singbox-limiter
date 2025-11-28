@@ -37,3 +37,11 @@ temp/
 .vscode/
 .idea/
 *.iml
+
+# 前端构建产物
+frontend/dist/
+frontend/node_modules/
+public/*.html
+public/*.js
+public/*.css
+public/assets/

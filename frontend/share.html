@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>客户端信息 - SingBox Limiter</title>
+  <link rel="stylesheet" href="/src/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    .share-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .share-header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+    }
+    .share-header h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="share-container">
+    <div class="share-header">
+      <h1>📊 客户端信息</h1>
+      <p>流量使用情况和连接信息</p>
+    </div>
+
+    <div id="shareContent">
+      <div style="text-align: center; padding: 60px; color: white;">
+        <div class="loading" style="margin: 0 auto; border-color: white; border-top-color: rgba(255,255,255,0.3);"></div>
+        <p style="margin-top: 16px;">加载中...</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { api, formatBytes, formatDate, copyToClipboard, showToast } from './src/utils/api.js';
+
+    const token = window.location.hash.substring(1);
+
+    if (!token) {
+      document.getElementById('shareContent').innerHTML = `
+        <div class="card">
+          <div style="text-align: center; padding: 40px; color: var(--gray-500);">
+            <h3>无效的分享链接</h3>
+          </div>
+        </div>
+      `;
+    } else {
+      loadShareData();
+    }
+
+    async function loadShareData() {
+      try {
+        const data = await api.getShareData(token);
+        renderShare(data);
+      } catch (error) {
+        document.getElementById('shareContent').innerHTML = `
+          <div class="card">
+            <div style="text-align: center; padding: 40px; color: var(--gray-500);">
+              <h3>加载失败</h3>
+              <p style="margin-top: 12px;">${error.message}</p>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function renderShare(data) {
+      const container = document.getElementById('shareContent');
+
+      container.innerHTML = `
+        <div class="card">
+          <h2 style="font-size: 24px; margin-bottom: 20px; text-align: center;">${data.name}</h2>
+
+          <div class="grid grid-2" style="margin-bottom: 30px;">
+            <div class="stat-card">
+              <h3>已使用</h3>
+              <div class="value">${data.used}</div>
+            </div>
+            <div class="stat-card">
+              <h3>流量限额</h3>
+              <div class="value">${data.limit}</div>
+            </div>
+          </div>
+
+          ${data.usagePercent > 0 ? `
+            <div style="margin-bottom: 30px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="font-size: 14px; color: var(--gray-600);">使用进度</span>
+                <span style="font-size: 14px; font-weight: 600;">${data.usagePercent}%</span>
+              </div>
+              <div class="progress-bar" style="height: 12px;">
+                <div class="progress-fill" style="width: ${data.usagePercent}%; background: ${parseFloat(data.usagePercent) > 90 ? 'var(--danger)' : 'var(--primary)'}"></div>
+              </div>
+            </div>
+          ` : ''}
+
+          <div class="grid grid-2" style="margin-bottom: 30px;">
+            <div>
+              <div style="font-size: 13px; color: var(--gray-500); margin-bottom: 4px;">状态</div>
+              <div>${data.active ? '<span class="badge badge-success">正常</span>' : '<span class="badge badge-danger">已停用</span>'}</div>
+            </div>
+            <div>
+              <div style="font-size: 13px; color: var(--gray-500); margin-bottom: 4px;">到期时间</div>
+              <div>${formatDate(data.expiryDate)}</div>
+            </div>
+          </div>
+
+          ${data.nextResetDate ? `
+            <div style="background: var(--gray-50); padding: 16px; border-radius: 8px; margin-bottom: 30px;">
+              <div style="font-size: 13px; color: var(--gray-500);">下次流量重置</div>
+              <div style="font-size: 18px; font-weight: 600; margin-top: 4px;">${formatDate(data.nextResetDate)}</div>
+              <div style="font-size: 12px; color: var(--gray-600); margin-top: 4px;">每月 ${data.resetDay} 号自动重置</div>
+            </div>
+          ` : ''}
+
+          <h3 style="margin-bottom: 16px;">流量趋势（最近 24 小时）</h3>
+          <canvas id="trafficChart" style="max-height: 300px; margin-bottom: 30px;"></canvas>
+
+          <div style="background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 20px; border-radius: 12px;">
+            <h3 style="margin-bottom: 16px;">连接信息</h3>
+
+            <div class="form-group">
+              <label style="color: rgba(255,255,255,0.9); font-size: 13px;">Reality 连接</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" class="input" value="${data.urls.reality}" readonly id="realityUrl" />
+                <button class="btn btn-secondary" onclick="copyUrl('realityUrl')">复制</button>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label style="color: rgba(255,255,255,0.9); font-size: 13px;">Hysteria2 连接</label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" class="input" value="${data.urls.hysteria2}" readonly id="hy2Url" />
+                <button class="btn btn-secondary" onclick="copyUrl('hy2Url')">复制</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      renderChart(data.history);
+    }
+
+    function renderChart(history) {
+      const ctx = document.getElementById('trafficChart');
+
+      const labels = history.map(h => new Date(h.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }));
+      const uploads = history.map(h => h.upload / 1024 / 1024);
+      const downloads = history.map(h => h.download / 1024 / 1024);
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: '上传 (MB)',
+              data: uploads,
+              borderColor: 'rgb(239, 68, 68)',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              fill: true
+            },
+            {
+              label: '下载 (MB)',
+              data: downloads,
+              borderColor: 'rgb(59, 130, 246)',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    window.copyUrl = async function(id) {
+      const input = document.getElementById(id);
+      await copyToClipboard(input.value);
+      showToast('已复制到剪贴板');
+    };
+  </script>
+</body>
+</html>
