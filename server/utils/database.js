@@ -37,7 +37,7 @@ export function initDatabase() {
       server_ip TEXT NOT NULL,
       reality_port INTEGER DEFAULT 443,
       hysteria_port INTEGER DEFAULT 8443,
-      sni TEXT DEFAULT 'www.google.com',
+      sni TEXT DEFAULT 'music.apple.com',
       public_key TEXT NOT NULL,
       private_key TEXT NOT NULL,
       short_id TEXT NOT NULL,

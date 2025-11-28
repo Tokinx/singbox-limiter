@@ -34,9 +34,7 @@ export function generateRealityConfig(client) {
         },
         private_key: client.private_key,
         short_id: [client.short_id]
-      },
-      certificate_path: '/etc/sing-box/server.pem',
-      key_path: '/etc/sing-box/server.key'
+      }
     }
   };
 }

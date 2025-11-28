@@ -135,7 +135,7 @@ router.post('/', async (req, res) => {
       server_ip: process.env.SERVER_IP || 'your_server_ip',
       reality_port: realityPort,
       hysteria_port: hysteriaPort,
-      sni: sni || process.env.DEFAULT_SNI || 'www.google.com',
+      sni: sni || process.env.DEFAULT_SNI || 'music.apple.com',
       public_key: publicKey,
       private_key: privateKey,
       short_id: shortId,
