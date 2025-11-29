@@ -42,7 +42,7 @@ export const ShareView: React.FC<ShareViewProps> = ({
       <main className="flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
           {/* Header Card */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 md:p-8 border border-gray-200 dark:border-gray-700 shadow-sm relative overflow-hidden mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded p-6 md:p-8 border border-gray-200 dark:border-gray-700 shadow-sm relative overflow-hidden mb-6">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
@@ -106,7 +106,7 @@ export const ShareView: React.FC<ShareViewProps> = ({
 
               {/* Meta Info - Same as ClientDetail */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700/50">
+                <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded border border-gray-100 dark:border-gray-700/50">
                   <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">
                     {t('expires', lang)}
                   </div>
@@ -114,7 +114,7 @@ export const ShareView: React.FC<ShareViewProps> = ({
                     {formatDate(client.expiryDate)}
                   </div>
                 </div>
-                <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700/50">
+                <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded border border-gray-100 dark:border-gray-700/50">
                   <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">
                     {t('reset', lang)}
                   </div>
@@ -127,7 +127,7 @@ export const ShareView: React.FC<ShareViewProps> = ({
               </div>
 
               {/* Server Config - Same as ClientDetail */}
-              <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700/50 space-y-2">
+              <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded border border-gray-100 dark:border-gray-700/50 space-y-2">
                 <div className="flex justify-between items-center text-sm">
                   <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
                     <Globe size={14} />

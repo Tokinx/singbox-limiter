@@ -260,7 +260,7 @@ const App: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* Toast */}
       {toast && (
-        <div className="fixed top-5 right-5 z-50 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-xl shadow-blue-500/20 animate-fade-in font-medium">
+        <div className="fixed top-5 right-5 z-50 bg-blue-600 text-white px-6 py-3 rounded shadow-xl shadow-blue-500/20 animate-fade-in font-medium">
           {toast}
         </div>
       )}
@@ -275,7 +275,7 @@ const App: React.FC = () => {
               setActiveClientId(null);
             }}
           >
-            <div className="bg-blue-600 p-2 rounded-lg group-hover:scale-105 transition-transform shadow-lg shadow-blue-500/30">
+            <div className="bg-blue-600 p-2 rounded group-hover:scale-105 transition-transform shadow-lg shadow-blue-500/30">
               <LayoutDashboard size={20} className="text-white" />
             </div>
             <h1 className="font-bold text-xl tracking-tight hidden md:block text-gray-900 dark:text-white">
@@ -288,7 +288,7 @@ const App: React.FC = () => {
             <div className="relative" ref={themeDropdownRef}>
               <button
                 onClick={() => setShowThemeDropdown(!showThemeDropdown)}
-                className="flex items-center gap-1.5 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors"
+                className="flex items-center gap-1.5 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors"
                 title={t('theme', lang)}
               >
                 {theme === 'auto' && <Monitor size={18} />}
@@ -297,7 +297,7 @@ const App: React.FC = () => {
                 <ChevronDown size={14} className={`transition-transform ${showThemeDropdown ? 'rotate-180' : ''}`} />
               </button>
               {showThemeDropdown && (
-                <div className="absolute right-0 mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 z-50">
+                <div className="absolute right-0 mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg py-1 z-50">
                   <button
                     onClick={() => handleThemeChange('auto')}
                     className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${theme === 'auto' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
@@ -327,14 +327,14 @@ const App: React.FC = () => {
             <div className="relative" ref={langDropdownRef}>
               <button
                 onClick={() => setShowLangDropdown(!showLangDropdown)}
-                className="flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg"
+                className="flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded"
               >
                 <Globe size={16} />
                 {lang === 'zh' ? '中文' : 'EN'}
                 <ChevronDown size={14} className={`transition-transform ${showLangDropdown ? 'rotate-180' : ''}`} />
               </button>
               {showLangDropdown && (
-                <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 z-50">
+                <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg py-1 z-50">
                   <button
                     onClick={() => handleLanguageChange('zh')}
                     className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${lang === 'zh' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}

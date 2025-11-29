@@ -69,7 +69,7 @@ export const TrafficChart: React.FC<TrafficChartProps> = ({
   return (
     <div
       style={{ width: '100%', height }}
-      className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm"
+      className="bg-white dark:bg-gray-800 rounded p-5 border border-gray-200 dark:border-gray-700 shadow-sm"
     >
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-gray-400 dark:text-gray-500 text-xs font-bold uppercase tracking-wider">

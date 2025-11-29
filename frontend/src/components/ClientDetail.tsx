@@ -90,7 +90,7 @@ export const ClientDetail: React.FC<ClientDetailProps> = ({
           onClick={onBack}
           className="flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors gap-2 group self-start"
         >
-          <div className="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm group-hover:shadow-md transition-all">
+          <div className="p-2 rounded bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm group-hover:shadow-md transition-all">
             <ArrowLeft size={20} />
           </div>
           <span className="font-medium">{t('back', lang)}</span>
@@ -99,14 +99,14 @@ export const ClientDetail: React.FC<ClientDetailProps> = ({
         <div className="flex gap-3 flex-wrap">
           <button
             onClick={() => onShare(client.id)}
-            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-blue-500 dark:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-700 font-medium transition-all shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-blue-500 dark:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded border border-gray-200 dark:border-gray-700 font-medium transition-all shadow-sm"
           >
             <Share2 size={18} />
             {t('sharePage', lang)}
           </button>
           <button
             onClick={toggleStatus}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all shadow-sm ${
+            className={`flex items-center gap-2 px-4 py-2 rounded font-medium transition-all shadow-sm ${
               client.active
                 ? 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30'
                 : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/30'
@@ -121,7 +121,7 @@ export const ClientDetail: React.FC<ClientDetailProps> = ({
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         {/* Stats Card */}
-        <div className="col-span-1 bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="col-span-1 bg-white dark:bg-gray-800 rounded p-5 border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               {client.name}
@@ -174,7 +174,7 @@ export const ClientDetail: React.FC<ClientDetailProps> = ({
 
             {/* Meta Info */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700/50">
+              <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded border border-gray-100 dark:border-gray-700/50">
                 <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">
                   {t('expires', lang)}
                 </div>
@@ -182,7 +182,7 @@ export const ClientDetail: React.FC<ClientDetailProps> = ({
                   {formatDate(client.expiryDate)}
                 </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700/50">
+              <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded border border-gray-100 dark:border-gray-700/50">
                 <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">
                   {t('reset', lang)}
                 </div>
@@ -195,7 +195,7 @@ export const ClientDetail: React.FC<ClientDetailProps> = ({
             </div>
 
             {/* Server Config */}
-            <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700/50 space-y-2">
+            <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded border border-gray-100 dark:border-gray-700/50 space-y-2">
               <div className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
                   <Globe size={14} />
@@ -229,13 +229,13 @@ export const ClientDetail: React.FC<ClientDetailProps> = ({
             <div className="pt-4 border-t border-gray-100 dark:border-gray-700 flex gap-2">
               <button
                 onClick={handleReset}
-                className="flex-1 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors"
+                className="flex-1 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-white rounded text-sm font-medium flex items-center justify-center gap-2 transition-colors"
               >
                 <RotateCcw size={16} /> {t('resetTraffic', lang)}
               </button>
               <button
                 onClick={handleDelete}
-                className="px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded-lg border border-red-200 dark:border-red-500/20 transition-colors"
+                className="px-4 py-2 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 rounded border border-red-200 dark:border-red-500/20 transition-colors"
               >
                 <Trash2 size={18} />
               </button>
@@ -255,7 +255,7 @@ export const ClientDetail: React.FC<ClientDetailProps> = ({
       </div>
 
       {/* Connection Strings */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
         <div className="p-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
           <h3 className="font-bold text-gray-900 dark:text-white">
             {t('protocols', lang)}
@@ -281,12 +281,12 @@ export const ClientDetail: React.FC<ClientDetailProps> = ({
                 <input
                   readOnly
                   value={proto.fn(client)}
-                  className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 text-xs text-gray-600 dark:text-gray-300 font-mono focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all pr-12"
+                  className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded px-4 py-3 text-xs text-gray-600 dark:text-gray-300 font-mono focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all pr-12"
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-2">
                   <button
                     onClick={() => handleCopy(proto.fn(client), proto.id)}
-                    className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-lg text-gray-400 hover:text-blue-500 transition-all"
+                    className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded text-gray-400 hover:text-blue-500 transition-all"
                     title={t('copy', lang)}
                   >
                     {copied === proto.id ? (

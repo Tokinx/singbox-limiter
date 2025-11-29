@@ -56,7 +56,7 @@ export const CreateClientModal: React.FC<CreateClientModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-lg border border-gray-200 dark:border-gray-700 shadow-2xl animate-fade-in-up flex flex-col max-h-[90vh]">
+      <div className="bg-white dark:bg-gray-800 rounded w-full max-w-lg border border-gray-200 dark:border-gray-700 shadow-2xl animate-fade-in-up flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="p-5 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50 rounded-t-xl">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -81,7 +81,7 @@ export const CreateClientModal: React.FC<CreateClientModalProps> = ({
                 name="name"
                 required
                 autoFocus
-                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded p-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                 placeholder="e.g. Alice Mobile"
               />
             </div>
@@ -93,7 +93,7 @@ export const CreateClientModal: React.FC<CreateClientModalProps> = ({
               <input
                 name="email"
                 type="email"
-                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded p-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                 placeholder="user@example.com"
               />
             </div>
@@ -107,7 +107,7 @@ export const CreateClientModal: React.FC<CreateClientModalProps> = ({
                 type="number"
                 defaultValue="0"
                 min="0"
-                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded p-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
               />
               <p className="text-xs text-gray-500 mt-1">
                 {t('trafficLimitDesc', lang)}
@@ -122,7 +122,7 @@ export const CreateClientModal: React.FC<CreateClientModalProps> = ({
                 <input
                   name="expiryDate"
                   type="date"
-                  className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                  className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded p-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                 />
               </div>
               <div>
@@ -135,7 +135,7 @@ export const CreateClientModal: React.FC<CreateClientModalProps> = ({
                   min="1"
                   max="31"
                   defaultValue="1"
-                  className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                  className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded p-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                 />
               </div>
             </div>
@@ -152,7 +152,7 @@ export const CreateClientModal: React.FC<CreateClientModalProps> = ({
                   max="65535"
                   defaultValue="443"
                   required
-                  className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                  className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded p-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                 />
               </div>
               <div>
@@ -166,7 +166,7 @@ export const CreateClientModal: React.FC<CreateClientModalProps> = ({
                   max="65535"
                   defaultValue="8443"
                   required
-                  className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                  className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded p-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                 />
               </div>
             </div>
@@ -179,7 +179,7 @@ export const CreateClientModal: React.FC<CreateClientModalProps> = ({
                 name="sni"
                 type="text"
                 placeholder="music.apple.com"
-                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded p-2.5 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
               />
             </div>
           </form>
@@ -191,7 +191,7 @@ export const CreateClientModal: React.FC<CreateClientModalProps> = ({
             form="createForm"
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-lg transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
+            className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

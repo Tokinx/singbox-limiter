@@ -38,7 +38,7 @@ export const ClientList: React.FC<ClientListProps> = ({
         </div>
         <button
           onClick={onAdd}
-          className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-lg shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2 font-medium"
+          className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2 font-medium"
         >
           <Plus size={18} />
           {t('newClient', lang)}
@@ -103,7 +103,7 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onSelect, lang }) => {
   return (
     <div
       onClick={() => onSelect(client.id)}
-      className={`bg-white dark:bg-gray-800 rounded-xl border ${borderColor} p-5 cursor-pointer ${bgHover} hover:shadow-lg transition-all duration-300 group`}
+      className={`bg-white dark:bg-gray-800 rounded border ${borderColor} p-5 cursor-pointer ${bgHover} hover:shadow-lg transition-all duration-300 group`}
     >
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
@@ -116,7 +116,7 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onSelect, lang }) => {
           </p>
         </div>
         <div
-          className={`${statusColor} bg-gray-50 dark:bg-gray-900/50 p-2 rounded-lg`}
+          className={`${statusColor} bg-gray-50 dark:bg-gray-900/50 p-2 rounded`}
         >
           {healthy ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
         </div>
@@ -166,7 +166,7 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onSelect, lang }) => {
 
         {/* Meta Info */}
         <div className="grid grid-cols-2 gap-3 text-xs">
-          <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700/50">
+          <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded border border-gray-100 dark:border-gray-700/50">
             <span className="block text-gray-400 uppercase font-bold tracking-wider text-[10px] mb-1">
               {t('expires', lang)}
             </span>
@@ -174,7 +174,7 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onSelect, lang }) => {
               {formatDate(client.expiryDate)}
             </span>
           </div>
-          <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-lg border border-gray-100 dark:border-gray-700/50">
+          <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded border border-gray-100 dark:border-gray-700/50">
             <span className="block text-gray-400 uppercase font-bold tracking-wider text-[10px] mb-1">
               {t('reset', lang)}
             </span>

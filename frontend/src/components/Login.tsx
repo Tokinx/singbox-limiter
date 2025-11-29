@@ -48,7 +48,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, lang }) => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Error Message */}
             {error && (
-              <div className="flex items-center gap-2 text-red-500 bg-red-50 dark:bg-red-500/10 p-3 rounded-xl text-sm">
+              <div className="flex items-center gap-2 text-red-500 bg-red-50 dark:bg-red-500/10 p-3 rounded text-sm">
                 <AlertCircle size={18} />
                 {error}
               </div>
@@ -66,7 +66,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, lang }) => {
                 required
                 autoFocus
                 autoComplete="username"
-                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded p-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                 placeholder="admin"
               />
             </div>
@@ -82,7 +82,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, lang }) => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
-                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded p-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                 placeholder="••••••••"
               />
             </div>
@@ -91,7 +91,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin, lang }) => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-bold py-3 rounded transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
