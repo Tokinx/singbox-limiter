@@ -46,6 +46,7 @@ const App: React.FC = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(false);
+  const [currentTrafficHours, setCurrentTrafficHours] = useState(1); // 当前流量历史时间范围（小时）
 
   // 实时更新间隔 (ms)
   const REFRESH_INTERVAL = 5000;
@@ -95,15 +96,21 @@ const App: React.FC = () => {
           if (view === 'detail' && authenticated) {
             // 详情页：刷新完整客户端数据
             const data = await clientApi.getAll();
-            setClients(data);
+            // 同时刷新流量历史
+            const history = await clientApi.getTraffic(activeClientId, currentTrafficHours);
+            setClients(data.map((c) =>
+              c.id === activeClientId ? { ...c, history } : c
+            ));
           } else if (view === 'share') {
             // 分享页：通过 hash 中的 token 刷新
             const hash = window.location.hash;
             if (hash.startsWith('#/share/')) {
               const token = hash.slice(8);
               const { client } = await shareApi.getData(token);
+              // 同时刷新流量历史
+              const history = await clientApi.getTraffic(client.id, currentTrafficHours);
               setClients((prev) =>
-                prev.map((c) => (c.id === client.id ? { ...client, history: c.history } : c))
+                prev.map((c) => (c.id === client.id ? { ...client, history } : c))
               );
             }
           }
@@ -115,7 +122,7 @@ const App: React.FC = () => {
       const interval = setInterval(refreshData, REFRESH_INTERVAL);
       return () => clearInterval(interval);
     }
-  }, [view, activeClientId, authenticated]);
+  }, [view, activeClientId, authenticated, currentTrafficHours]);
 
   // Theme Logic
   useEffect(() => {
@@ -246,13 +253,14 @@ const App: React.FC = () => {
   const handleResetTraffic = async (id: string) => {
     await clientApi.resetTraffic(id);
     setClients((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, usedBytes: 0, tempBytes: 0 } : c))
+      prev.map((c) => (c.id === id ? { ...c, usedBytes: 0, tempBytes: 0, history: [] } : c))
     );
     showToast(t('resetSuccess', lang));
   };
 
   const handleLoadTraffic = async (id: string, hours: number) => {
     try {
+      setCurrentTrafficHours(hours); // 更新当前时间范围
       const history = await clientApi.getTraffic(id, hours);
       setClients((prev) =>
         prev.map((c) => (c.id === id ? { ...c, history } : c))

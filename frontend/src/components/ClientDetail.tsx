@@ -135,7 +135,7 @@ export const ClientDetail: React.FC<ClientDetailProps> = ({
             </span>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Usage Bar */}
             <div>
               <div className="flex justify-between text-sm mb-2">
