@@ -33,6 +33,35 @@ import { join } from 'path';
 const router = express.Router();
 
 /**
+ * 将数据库字段转换为 API 响应格式 (snake_case -> camelCase)
+ */
+function toClientResponse(dbClient) {
+  if (!dbClient) return null;
+  return {
+    id: dbClient.id,
+    name: dbClient.name,
+    email: dbClient.email,
+    uuid: dbClient.uuid,
+    flow: dbClient.flow,
+    limitBytes: dbClient.limit_bytes,
+    usedBytes: dbClient.used_bytes,
+    resetInterval: dbClient.reset_interval,
+    resetDay: dbClient.reset_day,
+    expiryDate: dbClient.expiry_date,
+    active: dbClient.active === 1,
+    serverIp: dbClient.server_ip,
+    realityPort: dbClient.reality_port,
+    hysteriaPort: dbClient.hysteria_port,
+    sni: dbClient.sni,
+    publicKey: dbClient.public_key,
+    privateKey: dbClient.private_key,
+    shortId: dbClient.short_id,
+    containerName: dbClient.container_name,
+    shareToken: dbClient.share_token,
+  };
+}
+
+/**
  * GET /api/clients
  * 获取所有客户端列表
  */
@@ -40,7 +69,7 @@ router.get('/', async (req, res) => {
   try {
     const clients = getAllClients();
 
-    // 附加容器运行状态
+    // 附加容器运行状态并转换字段
     const clientsWithStatus = await Promise.all(
       clients.map(async (client) => {
         const containerRunning = client.container_name
@@ -48,7 +77,7 @@ router.get('/', async (req, res) => {
           : false;
 
         return {
-          ...client,
+          ...toClientResponse(client),
           containerRunning
         };
       })
@@ -79,7 +108,7 @@ router.get('/:id', async (req, res) => {
       : false;
 
     res.json({
-      ...client,
+      ...toClientResponse(client),
       containerRunning
     });
   } catch (error) {
@@ -164,7 +193,7 @@ router.post('/', async (req, res) => {
     res.status(201).json({
       success: true,
       client: {
-        ...newClient,
+        ...toClientResponse(newClient),
         configPath
       }
     });
@@ -222,9 +251,12 @@ router.put('/:id', async (req, res) => {
 
     updateClient(req.params.id, updates);
 
+    // 获取更新后的客户端数据
+    const updatedClient = getClientById(req.params.id);
+
     res.json({
       success: true,
-      client: { ...client, ...updates }
+      client: toClientResponse(updatedClient)
     });
   } catch (error) {
     console.error('更新客户端失败:', error);
@@ -331,9 +363,13 @@ router.get('/:id/urls', (req, res) => {
       return res.status(404).json({ error: '客户端不存在' });
     }
 
+    // 生成分享页面 URL
+    const shareUrl = `${req.protocol}://${req.get('host')}/#/share/${client.share_token}`;
+
     res.json({
       reality: buildRealityUrl(client),
-      hysteria2: buildHysteria2Url(client)
+      hysteria2: buildHysteria2Url(client),
+      shareUrl
     });
   } catch (error) {
     console.error('生成连接 URL 失败:', error);

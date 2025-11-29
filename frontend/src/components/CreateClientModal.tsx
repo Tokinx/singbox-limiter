@@ -30,14 +30,20 @@ export const CreateClientModal: React.FC<CreateClientModalProps> = ({
     const limitGb = parseInt(formData.get('limit') as string) || 0;
     const expiryDateVal = formData.get('expiryDate') as string;
     const resetDayVal = parseInt(formData.get('resetDay') as string) || 1;
+    const realityPort = parseInt(formData.get('realityPort') as string) || 443;
+    const hysteriaPort = parseInt(formData.get('hysteriaPort') as string) || 8443;
+    const sni = formData.get('sni') as string;
 
     const data: CreateClientRequest = {
       name,
       email: email || undefined,
-      limitBytes: limitGb === 0 ? -1 : limitGb * 1024 * 1024 * 1024,
+      limitGb,
       expiryDate: expiryDateVal ? new Date(expiryDateVal).toISOString() : null,
       resetInterval: 'monthly',
       resetDay: Math.min(31, Math.max(1, resetDayVal)),
+      realityPort,
+      hysteriaPort,
+      sni: sni || undefined,
     };
 
     try {
@@ -132,6 +138,49 @@ export const CreateClientModal: React.FC<CreateClientModalProps> = ({
                   className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
                 />
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  {t('realityPort', lang)}
+                </label>
+                <input
+                  name="realityPort"
+                  type="number"
+                  min="1"
+                  max="65535"
+                  defaultValue="443"
+                  required
+                  className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                  {t('hysteriaPort', lang)}
+                </label>
+                <input
+                  name="hysteriaPort"
+                  type="number"
+                  min="1"
+                  max="65535"
+                  defaultValue="8443"
+                  required
+                  className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                {t('sni', lang)}
+              </label>
+              <input
+                name="sni"
+                type="text"
+                placeholder="music.apple.com"
+                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-3 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+              />
             </div>
           </form>
         </div>

@@ -77,18 +77,22 @@ export const clientApi = {
   get: (id: string): Promise<Client> => request<Client>(`/clients/${id}`),
 
   // 创建客户端
-  create: (data: CreateClientRequest): Promise<Client> =>
-    request<Client>('/clients', {
+  create: async (data: CreateClientRequest): Promise<Client> => {
+    const response = await request<{ success: boolean; client: Client }>('/clients', {
       method: 'POST',
       body: JSON.stringify(data),
-    }),
+    });
+    return response.client;
+  },
 
   // 更新客户端
-  update: (id: string, data: UpdateClientRequest): Promise<Client> =>
-    request<Client>(`/clients/${id}`, {
+  update: async (id: string, data: UpdateClientRequest): Promise<Client> => {
+    const response = await request<{ success: boolean; client: Client }>(`/clients/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
-    }),
+    });
+    return response.client;
+  },
 
   // 删除客户端
   delete: (id: string): Promise<void> =>
@@ -111,11 +115,13 @@ export const clientApi = {
     request<ClientUrls>(`/clients/${id}/urls`),
 
   // 切换启用/禁用状态
-  toggleActive: (id: string, active: boolean): Promise<Client> =>
-    request<Client>(`/clients/${id}`, {
+  toggleActive: async (id: string, active: boolean): Promise<Client> => {
+    const response = await request<{ success: boolean; client: Client }>(`/clients/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ active }),
-    }),
+    });
+    return response.client;
+  },
 };
 
 // 分享页面 API

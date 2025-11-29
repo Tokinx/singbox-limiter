@@ -20,6 +20,7 @@ export interface Client {
   expiryDate: string | null; // ISO Date string
   // 状态
   active: boolean;
+  containerRunning?: boolean; // 容器运行状态
   // 连接配置
   serverIp: string;
   realityPort: number;
@@ -35,10 +36,13 @@ export interface Client {
 export interface CreateClientRequest {
   name: string;
   email?: string;
-  limitBytes?: number;
+  limitGb?: number;
   expiryDate?: string | null;
   resetInterval?: 'monthly' | 'manual';
   resetDay?: number;
+  realityPort: number;
+  hysteriaPort: number;
+  sni?: string;
 }
 
 // 更新客户端请求
