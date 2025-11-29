@@ -24,11 +24,12 @@ export function initDatabase() {
     CREATE TABLE IF NOT EXISTS clients (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
-      email TEXT,
+      remark TEXT,
       uuid TEXT UNIQUE NOT NULL,
       flow TEXT DEFAULT 'xtls-rprx-vision',
       limit_bytes INTEGER DEFAULT -1,
       used_bytes INTEGER DEFAULT 0,
+      temp_bytes INTEGER DEFAULT 0,
       reset_interval TEXT DEFAULT 'monthly',
       reset_day INTEGER DEFAULT 1,
       last_reset_date TEXT,
@@ -49,11 +50,27 @@ export function initDatabase() {
     )
   `);
 
-  // 为旧数据库添加 obfs_password 字段（如果不存在）
+  // 为旧数据库添加新字段（如果不存在）
   try {
     db.exec(`ALTER TABLE clients ADD COLUMN obfs_password TEXT`);
   } catch (e) {
     // 列已存在，忽略错误
+  }
+  try {
+    db.exec(`ALTER TABLE clients ADD COLUMN temp_bytes INTEGER DEFAULT 0`);
+  } catch (e) {
+    // 列已存在，忽略错误
+  }
+  try {
+    db.exec(`ALTER TABLE clients ADD COLUMN remark TEXT`);
+  } catch (e) {
+    // 列已存在，忽略错误
+  }
+  // 迁移 email 字段到 remark（如果 email 存在且 remark 为空）
+  try {
+    db.exec(`UPDATE clients SET remark = email WHERE remark IS NULL AND email IS NOT NULL`);
+  } catch (e) {
+    // 忽略错误
   }
 
   // 流量历史记录表
@@ -121,11 +138,11 @@ export function getClientByShareToken(token) {
 export function createClient(client) {
   const stmt = db.prepare(`
     INSERT INTO clients (
-      id, name, email, uuid, flow, limit_bytes, reset_interval,
+      id, name, remark, uuid, flow, limit_bytes, reset_interval,
       reset_day, expiry_date, server_ip, reality_port, hysteria_port,
       sni, public_key, private_key, short_id, obfs_password, container_name, share_token
     ) VALUES (
-      @id, @name, @email, @uuid, @flow, @limit_bytes, @reset_interval,
+      @id, @name, @remark, @uuid, @flow, @limit_bytes, @reset_interval,
       @reset_day, @expiry_date, @server_ip, @reality_port, @hysteria_port,
       @sni, @public_key, @private_key, @short_id, @obfs_password, @container_name, @share_token
     )
@@ -195,11 +212,11 @@ export function getClientTrafficHistory(clientId, hours = 24) {
   return stmt.all(clientId, hours);
 }
 
-// 重置客户端流量
+// 重置客户端流量（同时清空临时流量）
 export function resetClientTraffic(clientId) {
   const stmt = db.prepare(`
     UPDATE clients
-    SET used_bytes = 0, last_reset_date = CURRENT_TIMESTAMP
+    SET used_bytes = 0, temp_bytes = 0, last_reset_date = CURRENT_TIMESTAMP
     WHERE id = ?
   `);
   return stmt.run(clientId);

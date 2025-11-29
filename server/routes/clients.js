@@ -41,11 +41,12 @@ function toClientResponse(dbClient) {
   return {
     id: dbClient.id,
     name: dbClient.name,
-    email: dbClient.email,
+    remark: dbClient.remark || '',
     uuid: dbClient.uuid,
     flow: dbClient.flow,
     limitBytes: dbClient.limit_bytes,
     usedBytes: dbClient.used_bytes,
+    tempBytes: dbClient.temp_bytes || 0,
     resetInterval: dbClient.reset_interval,
     resetDay: dbClient.reset_day,
     expiryDate: dbClient.expiry_date,
@@ -127,7 +128,7 @@ router.post('/', async (req, res) => {
   try {
     const {
       name,
-      email,
+      remark,
       limitGb = 0,
       resetInterval = 'monthly',
       resetDay = 1,
@@ -157,7 +158,7 @@ router.post('/', async (req, res) => {
     const newClient = {
       id: clientId,
       name,
-      email: email || `${name.toLowerCase().replace(/\s/g, '.')}@example.com`,
+      remark: remark || '',
       uuid,
       flow: 'xtls-rprx-vision',
       limit_bytes: limitGb === 0 ? -1 : limitGb * 1024 * 1024 * 1024,
@@ -221,25 +222,49 @@ router.put('/:id', async (req, res) => {
 
     const {
       name,
+      remark,
       limitGb,
+      tempGb,
       resetDay,
       expiryDate,
+      realityPort,
+      hysteriaPort,
+      sni,
       active
     } = req.body;
 
     const updates = {};
+    let needsConfigRegenerate = false;
 
     if (name !== undefined) updates.name = name;
+    if (remark !== undefined) updates.remark = remark;
     if (limitGb !== undefined) {
       updates.limit_bytes = limitGb === 0 ? -1 : limitGb * 1024 * 1024 * 1024;
+    }
+    if (tempGb !== undefined) {
+      updates.temp_bytes = tempGb * 1024 * 1024 * 1024;
     }
     if (resetDay !== undefined) {
       updates.reset_day = Math.min(31, Math.max(1, resetDay));
     }
     if (expiryDate !== undefined) updates.expiry_date = expiryDate;
 
+    // 端口和 SNI 变更需要重新生成配置
+    if (realityPort !== undefined && realityPort !== client.reality_port) {
+      updates.reality_port = realityPort;
+      needsConfigRegenerate = true;
+    }
+    if (hysteriaPort !== undefined && hysteriaPort !== client.hysteria_port) {
+      updates.hysteria_port = hysteriaPort;
+      needsConfigRegenerate = true;
+    }
+    if (sni !== undefined && sni !== client.sni) {
+      updates.sni = sni;
+      needsConfigRegenerate = true;
+    }
+
     // 处理激活状态变更
-    if (active !== undefined && active !== client.active) {
+    if (active !== undefined && active !== (client.active === 1)) {
       updates.active = active ? 1 : 0;
 
       if (client.container_name) {
@@ -254,6 +279,19 @@ router.put('/:id', async (req, res) => {
     }
 
     updateClient(req.params.id, updates);
+
+    // 如果端口或 SNI 变更，需要重新生成配置并重启容器
+    if (needsConfigRegenerate) {
+      const updatedClientForConfig = getClientById(req.params.id);
+      generateSingBoxConfig(updatedClientForConfig);
+
+      // 重启容器以应用新配置
+      if (client.container_name && client.active === 1) {
+        await stopContainer(client.container_name);
+        await startContainer(client.container_name);
+        addAuditLog(req.params.id, 'CONFIG_UPDATE', '配置更新，容器已重启');
+      }
+    }
 
     // 获取更新后的客户端数据
     const updatedClient = getClientById(req.params.id);

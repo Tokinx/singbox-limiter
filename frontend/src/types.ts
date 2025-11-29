@@ -9,12 +9,13 @@ export interface TrafficHistory {
 export interface Client {
   id: string;
   name: string;
-  email: string;
+  remark: string;
   uuid: string;
   flow: string;
   // 流量限制
   limitBytes: number; // -1 表示无限
   usedBytes: number;
+  tempBytes: number; // 临时流量
   resetInterval: 'monthly' | 'manual';
   resetDay: number; // 1-31
   expiryDate: string | null; // ISO Date string
@@ -36,7 +37,7 @@ export interface Client {
 // 创建客户端请求
 export interface CreateClientRequest {
   name: string;
-  email?: string;
+  remark?: string;
   limitGb?: number;
   expiryDate?: string | null;
   resetInterval?: 'monthly' | 'manual';
@@ -49,11 +50,15 @@ export interface CreateClientRequest {
 // 更新客户端请求
 export interface UpdateClientRequest {
   name?: string;
-  email?: string;
-  limitBytes?: number;
+  remark?: string;
+  limitGb?: number;
+  tempGb?: number;
   expiryDate?: string | null;
   resetInterval?: 'monthly' | 'manual';
   resetDay?: number;
+  realityPort?: number;
+  hysteriaPort?: number;
+  sni?: string;
   active?: boolean;
 }
 
@@ -131,16 +136,24 @@ export const generateHy2Uri = (c: Client): string => {
   return `hysteria2://${c.uuid}@${c.serverIp}:${c.hysteriaPort}?sni=${c.sni}&insecure=1&obfs=salamander&obfs-password=${obfsPass}#${encodeURIComponent(c.name)}`;
 };
 
-// 计算剩余流量
+// 计算剩余流量（考虑临时流量）
 export const getRemainingBytes = (c: Client): number => {
-  if (c.limitBytes === -1) return Infinity;
-  return Math.max(0, c.limitBytes - c.usedBytes);
+  const totalLimit = c.limitBytes === -1 ? Infinity : c.limitBytes + (c.tempBytes || 0);
+  if (totalLimit === Infinity) return Infinity;
+  return Math.max(0, totalLimit - c.usedBytes);
 };
 
-// 计算使用百分比
+// 计算使用百分比（考虑临时流量）
 export const getUsagePercent = (c: Client): number => {
-  if (c.limitBytes === -1) return 0;
-  return Math.min(100, (c.usedBytes / c.limitBytes) * 100);
+  const totalLimit = c.limitBytes === -1 ? -1 : c.limitBytes + (c.tempBytes || 0);
+  if (totalLimit === -1) return 0;
+  return Math.min(100, (c.usedBytes / totalLimit) * 100);
+};
+
+// 获取总流量限制（基础 + 临时）
+export const getTotalLimitBytes = (c: Client): number => {
+  if (c.limitBytes === -1) return -1;
+  return c.limitBytes + (c.tempBytes || 0);
 };
 
 // 检查是否过期
@@ -149,10 +162,11 @@ export const isExpired = (c: Client): boolean => {
   return new Date(c.expiryDate) < new Date();
 };
 
-// 检查是否超过流量限制
+// 检查是否超过流量限制（考虑临时流量）
 export const isOverLimit = (c: Client): boolean => {
-  if (c.limitBytes === -1) return false;
-  return c.usedBytes >= c.limitBytes;
+  const totalLimit = getTotalLimitBytes(c);
+  if (totalLimit === -1) return false;
+  return c.usedBytes >= totalLimit;
 };
 
 // 检查客户端状态是否正常

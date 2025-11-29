@@ -62,14 +62,17 @@ const translations = {
 
     // 创建/编辑客户端
     clientName: '客户端名称',
-    clientEmail: '邮箱 (可选)',
+    clientRemark: '备注 (可选)',
     trafficLimit: '流量上限 (GB)',
     trafficLimitDesc: '0 表示无限流量',
+    tempTraffic: '临时流量 (GB)',
+    tempTrafficDesc: '仅在本周期内有效，重置后清空',
     expiryDate: '到期时间 (可选)',
     resetDay: '每月重置日 (1-31)',
     realityPort: 'Reality 端口',
     hysteriaPort: 'Hysteria2 端口',
     sni: 'SNI 域名',
+    editClient: '编辑客户端',
 
     // 确认对话框
     deleteConfirm: '确定要删除此客户端吗？此操作无法撤销。',
@@ -171,14 +174,17 @@ const translations = {
 
     // Create/Edit Client
     clientName: 'Client Name',
-    clientEmail: 'Email (Optional)',
+    clientRemark: 'Remark (Optional)',
     trafficLimit: 'Traffic Limit (GB)',
     trafficLimitDesc: '0 for unlimited',
+    tempTraffic: 'Temporary Traffic (GB)',
+    tempTrafficDesc: 'Only valid for current cycle, cleared after reset',
     expiryDate: 'Expiry Date (Optional)',
     resetDay: 'Reset Day (1-31)',
     realityPort: 'Reality Port',
     hysteriaPort: 'Hysteria2 Port',
     sni: 'SNI Domain',
+    editClient: 'Edit Client',
 
     // Confirmation Dialogs
     deleteConfirm: 'Delete this client? This cannot be undone.',

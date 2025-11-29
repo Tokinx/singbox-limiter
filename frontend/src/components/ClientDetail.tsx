@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ArrowLeft, Share2, Copy, Trash2, Power, RotateCcw, Check, Globe, Server } from "lucide-react";
-import type { Client } from "../types";
+import { ArrowLeft, Share2, Copy, Trash2, Power, RotateCcw, Check, Globe, Server, Edit } from "lucide-react";
+import type { Client, UpdateClientRequest } from "../types";
 import {
   formatBytes,
   formatDate,
@@ -8,6 +8,7 @@ import {
   getUsagePercent,
   getRemainingBytes,
   getNextResetTime,
+  getTotalLimitBytes,
   generateRealityUri,
   generateHy2Uri,
   isClientHealthy,
@@ -24,6 +25,7 @@ interface ClientDetailProps {
   onShare: (id: string) => void;
   onResetTraffic: (id: string) => void;
   onLoadTraffic?: (id: string, hours: number) => void;
+  onEdit?: (client: Client) => void;
   lang: Language;
 }
 
@@ -35,6 +37,7 @@ export const ClientDetail: React.FC<ClientDetailProps> = ({
   onShare,
   onResetTraffic,
   onLoadTraffic,
+  onEdit,
   lang,
 }) => {
   const [copied, setCopied] = useState<string | null>(null);
@@ -88,6 +91,13 @@ export const ClientDetail: React.FC<ClientDetailProps> = ({
 
         <div className="flex gap-3 flex-wrap">
           <button
+            onClick={() => onEdit?.(client)}
+            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded border border-gray-200 dark:border-gray-700 font-medium transition-all shadow-sm"
+          >
+            <Edit size={18} />
+            {t("editClient", lang)}
+          </button>
+          <button
             onClick={() => onShare(client.id)}
             className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 text-blue-500 dark:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded border border-gray-200 dark:border-gray-700 font-medium transition-all shadow-sm"
           >
@@ -132,7 +142,12 @@ export const ClientDetail: React.FC<ClientDetailProps> = ({
                 <span className="text-gray-500 dark:text-gray-400 font-medium">{t("usage", lang)}</span>
                 <span className="text-gray-900 dark:text-gray-200 font-mono font-bold">
                   {formatBytes(client.usedBytes)} <span className="text-gray-400">/</span>{" "}
-                  {client.limitBytes === -1 ? "∞" : formatBytes(client.limitBytes)}
+                  {getTotalLimitBytes(client) === -1 ? "∞" : formatBytes(getTotalLimitBytes(client))}
+                  {client.tempBytes > 0 && (
+                    <span className="text-blue-500 text-xs ml-1">
+                      (+{formatBytes(client.tempBytes)} {t("tempTraffic", lang).split(' ')[0]})
+                    </span>
+                  )}
                 </span>
               </div>
               <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -141,14 +156,14 @@ export const ClientDetail: React.FC<ClientDetailProps> = ({
                     usagePercent > 90 ? "bg-red-500" : "bg-blue-500"
                   }`}
                   style={{
-                    width: `${client.limitBytes === -1 ? 5 : usagePercent}%`,
+                    width: `${getTotalLimitBytes(client) === -1 ? 5 : usagePercent}%`,
                   }}
                 />
               </div>
               <div className="flex justify-between text-xs mt-3">
                 <span className="text-gray-400">{t("remaining", lang)}</span>
                 <span className="text-gray-700 dark:text-gray-300 font-mono font-medium">
-                  {client.limitBytes === -1 ? t("unlimited", lang) : formatBytes(remaining)}
+                  {getTotalLimitBytes(client) === -1 ? t("unlimited", lang) : formatBytes(remaining)}
                 </span>
               </div>
             </div>

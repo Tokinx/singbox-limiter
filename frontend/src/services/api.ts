@@ -86,12 +86,12 @@ export const clientApi = {
   },
 
   // 更新客户端
-  update: async (id: string, data: UpdateClientRequest): Promise<Client> => {
+  update: async (id: string, data: UpdateClientRequest): Promise<{ success: boolean; client: Client }> => {
     const response = await request<{ success: boolean; client: Client }>(`/clients/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
-    return response.client;
+    return response;
   },
 
   // 删除客户端

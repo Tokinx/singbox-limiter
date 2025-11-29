@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Globe, Server } from 'lucide-react';
 import type { Client } from '../types';
 import {
@@ -8,6 +8,7 @@ import {
   getUsagePercent,
   getRemainingBytes,
   getNextResetTime,
+  getTotalLimitBytes,
   isClientHealthy,
 } from '../types';
 import { TrafficChart, type TimeRange, timeRangeOptions } from './Charts';
@@ -81,9 +82,14 @@ export const ShareView: React.FC<ShareViewProps> = ({
                   <span className="text-gray-900 dark:text-gray-200 font-mono font-bold">
                     {formatBytes(client.usedBytes)}{' '}
                     <span className="text-gray-400">/</span>{' '}
-                    {client.limitBytes === -1
+                    {getTotalLimitBytes(client) === -1
                       ? '∞'
-                      : formatBytes(client.limitBytes)}
+                      : formatBytes(getTotalLimitBytes(client))}
+                    {client.tempBytes > 0 && (
+                      <span className="text-blue-500 text-xs ml-1">
+                        (+{formatBytes(client.tempBytes)})
+                      </span>
+                    )}
                   </span>
                 </div>
                 <div className="h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -92,14 +98,14 @@ export const ShareView: React.FC<ShareViewProps> = ({
                       usagePercent > 90 ? 'bg-red-500' : 'bg-blue-500'
                     }`}
                     style={{
-                      width: `${client.limitBytes === -1 ? 5 : usagePercent}%`,
+                      width: `${getTotalLimitBytes(client) === -1 ? 5 : usagePercent}%`,
                     }}
                   />
                 </div>
                 <div className="flex justify-between text-xs mt-3">
                   <span className="text-gray-400">{t('remaining', lang)}</span>
                   <span className="text-gray-700 dark:text-gray-300 font-mono font-medium">
-                    {client.limitBytes === -1
+                    {getTotalLimitBytes(client) === -1
                       ? t('unlimited', lang)
                       : formatBytes(remaining)}
                   </span>

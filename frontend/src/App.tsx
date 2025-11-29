@@ -9,7 +9,7 @@ import {
   Github,
   ChevronDown,
 } from 'lucide-react';
-import type { Client, Theme, CreateClientRequest } from './types';
+import type { Client, Theme, CreateClientRequest, UpdateClientRequest } from './types';
 import {
   ClientList,
   ClientDetail,
@@ -17,6 +17,7 @@ import {
   Login,
   CreateClientModal,
 } from './components';
+import { EditClientModal } from './components/EditClientModal';
 import {
   t,
   type Language,
@@ -42,7 +43,12 @@ const App: React.FC = () => {
   const [view, setView] = useState<View>(authenticated ? 'dashboard' : 'login');
   const [activeClientId, setActiveClientId] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // 实时更新间隔 (ms)
+  const REFRESH_INTERVAL = 5000;
 
   // UI State
   const [toast, setToast] = useState<string | null>(null);
@@ -80,6 +86,36 @@ const App: React.FC = () => {
       setView('dashboard');
     }
   }, [authenticated, loadClients]);
+
+  // 实时更新：详情页和分享页定时刷新数据
+  useEffect(() => {
+    if ((view === 'detail' || view === 'share') && activeClientId) {
+      const refreshData = async () => {
+        try {
+          if (view === 'detail' && authenticated) {
+            // 详情页：刷新完整客户端数据
+            const data = await clientApi.getAll();
+            setClients(data);
+          } else if (view === 'share') {
+            // 分享页：通过 hash 中的 token 刷新
+            const hash = window.location.hash;
+            if (hash.startsWith('#/share/')) {
+              const token = hash.slice(8);
+              const { client } = await shareApi.getData(token);
+              setClients((prev) =>
+                prev.map((c) => (c.id === client.id ? { ...client, history: c.history } : c))
+              );
+            }
+          }
+        } catch (error) {
+          console.error('Failed to refresh data:', error);
+        }
+      };
+
+      const interval = setInterval(refreshData, REFRESH_INTERVAL);
+      return () => clearInterval(interval);
+    }
+  }, [view, activeClientId, authenticated]);
 
   // Theme Logic
   useEffect(() => {
@@ -186,6 +222,19 @@ const App: React.FC = () => {
     showToast(t('updateSuccess', lang));
   };
 
+  const handleEditClient = (client: Client) => {
+    setEditingClient(client);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = async (id: string, data: UpdateClientRequest) => {
+    const result = await clientApi.update(id, data);
+    setClients((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, ...result.client } : c))
+    );
+    showToast(t('updateSuccess', lang));
+  };
+
   const handleDeleteClient = async (id: string) => {
     await clientApi.delete(id);
     setClients((prev) => prev.filter((c) => c.id !== id));
@@ -197,7 +246,7 @@ const App: React.FC = () => {
   const handleResetTraffic = async (id: string) => {
     await clientApi.resetTraffic(id);
     setClients((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, usedBytes: 0 } : c))
+      prev.map((c) => (c.id === id ? { ...c, usedBytes: 0, tempBytes: 0 } : c))
     );
     showToast(t('resetSuccess', lang));
   };
@@ -388,6 +437,7 @@ const App: React.FC = () => {
               onShare={handleShare}
               onResetTraffic={handleResetTraffic}
               onLoadTraffic={handleLoadTraffic}
+              onEdit={handleEditClient}
               lang={lang}
             />
           ) : null}
@@ -398,6 +448,18 @@ const App: React.FC = () => {
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
           onCreate={handleCreateClient}
+          lang={lang}
+        />
+
+        {/* Edit Modal */}
+        <EditClientModal
+          isOpen={showEditModal}
+          client={editingClient}
+          onClose={() => {
+            setShowEditModal(false);
+            setEditingClient(null);
+          }}
+          onSave={handleSaveEdit}
           lang={lang}
         />
       </main>
