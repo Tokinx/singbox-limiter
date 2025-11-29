@@ -3,8 +3,10 @@ import type { Client } from '../types';
 import {
   formatBytes,
   formatDate,
+  formatDateTime,
   getUsagePercent,
   getRemainingBytes,
+  getNextResetTime,
   isExpired,
   isOverLimit,
   isClientHealthy,
@@ -167,7 +169,7 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onSelect, lang }) => {
         {/* Meta Info */}
         <div className="grid grid-cols-2 gap-3 text-xs">
           <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded border border-gray-100 dark:border-gray-700/50">
-            <span className="block text-gray-400 uppercase font-bold tracking-wider text-[10px] mb-1">
+            <span className="block text-gray-400 uppercase font-bold tracking-wider text-xs mb-1">
               {t('expires', lang)}
             </span>
             <span className="text-gray-700 dark:text-gray-300 font-semibold truncate">
@@ -175,13 +177,13 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onSelect, lang }) => {
             </span>
           </div>
           <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded border border-gray-100 dark:border-gray-700/50">
-            <span className="block text-gray-400 uppercase font-bold tracking-wider text-[10px] mb-1">
-              {t('reset', lang)}
+            <span className="block text-gray-400 uppercase font-bold tracking-wider text-xs mb-1">
+              {t('nextReset', lang)}
             </span>
             <span className="text-gray-700 dark:text-gray-300 font-semibold truncate flex items-center gap-1">
               <Clock size={12} />
               {client.resetInterval === 'monthly'
-                ? `${t('day', lang)} ${client.resetDay}`
+                ? getNextResetTime(client)?.toLocaleDateString('zh-CN')
                 : t('manual', lang)}
             </span>
           </div>

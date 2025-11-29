@@ -46,9 +46,9 @@ const translations = {
     trafficHistory: '流量历史 (24h)',
 
     // 时间相关
-    expires: '到期',
-    never: '永久',
-    reset: '重置',
+    expires: '到期时间',
+    never: '长期有效',
+    nextReset: '下次重置',
     day: '日',
     manual: '手动',
     monthly: '每月',
@@ -155,9 +155,9 @@ const translations = {
     trafficHistory: 'Traffic History (24h)',
 
     // Time
-    expires: 'Expires',
-    never: 'Never',
-    reset: 'Reset',
+    expires: 'Expiry Time',
+    never: 'Long-term Validity',
+    nextReset: 'Next Reset',
     day: 'Day',
     manual: 'Manual',
     monthly: 'Monthly',

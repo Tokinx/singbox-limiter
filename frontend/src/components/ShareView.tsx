@@ -4,8 +4,10 @@ import type { Client } from '../types';
 import {
   formatBytes,
   formatDate,
+  formatDateTime,
   getUsagePercent,
   getRemainingBytes,
+  getNextResetTime,
   isClientHealthy,
 } from '../types';
 import { TrafficChart, type TimeRange, timeRangeOptions } from './Charts';
@@ -22,7 +24,7 @@ export const ShareView: React.FC<ShareViewProps> = ({
   lang = 'zh',
   onLoadTraffic,
 }) => {
-  const [timeRange, setTimeRange] = useState<TimeRange>('24h');
+  const [timeRange, setTimeRange] = useState<TimeRange>('1h');
 
   const remaining = getRemainingBytes(client);
   const usagePercent = getUsagePercent(client);
@@ -107,7 +109,7 @@ export const ShareView: React.FC<ShareViewProps> = ({
               {/* Meta Info - Same as ClientDetail */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded border border-gray-100 dark:border-gray-700/50">
-                  <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">
+                  <div className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">
                     {t('expires', lang)}
                   </div>
                   <div className="font-mono text-sm text-gray-700 dark:text-gray-300">
@@ -115,12 +117,12 @@ export const ShareView: React.FC<ShareViewProps> = ({
                   </div>
                 </div>
                 <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded border border-gray-100 dark:border-gray-700/50">
-                  <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wider mb-1">
-                    {t('reset', lang)}
+                  <div className="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">
+                    {t('nextReset', lang)}
                   </div>
                   <div className="font-mono text-sm text-gray-700 dark:text-gray-300">
                     {client.resetInterval === 'monthly'
-                      ? `${t('day', lang)} ${client.resetDay}`
+                      ? formatDateTime(getNextResetTime(client)!)
                       : t('manual', lang)}
                   </div>
                 </div>

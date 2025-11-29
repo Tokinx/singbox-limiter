@@ -91,6 +91,34 @@ export const formatDate = (dateString: string | null): string => {
   return date.toLocaleDateString('zh-CN');
 };
 
+// 格式化完整日期时间
+export const formatDateTime = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
+
+// 计算下次重置时间
+export const getNextResetTime = (c: Client): Date | null => {
+  if (c.resetInterval !== 'monthly') return null;
+
+  const now = new Date();
+  const resetDay = Math.min(c.resetDay, 28); // 避免月末问题
+
+  let nextReset = new Date(now.getFullYear(), now.getMonth(), resetDay, 0, 0, 0);
+
+  // 如果当前日期已经过了重置日，则下个月重置
+  if (now.getDate() >= resetDay) {
+    nextReset.setMonth(nextReset.getMonth() + 1);
+  }
+
+  return nextReset;
+};
+
 // 生成 Reality URI
 export const generateRealityUri = (c: Client): string => {
   return `vless://${c.uuid}@${c.serverIp}:${c.realityPort}?encryption=none&flow=${c.flow}&security=reality&sni=${c.sni}&fp=chrome&pbk=${c.publicKey}&sid=${c.shortId}&type=tcp&headerType=none#${encodeURIComponent(c.name)}`;
