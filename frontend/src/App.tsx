@@ -252,7 +252,7 @@ const App: React.FC = () => {
         </div>
       );
     }
-    return <ShareView client={client} lang={lang} />;
+    return <ShareView client={client} lang={lang} onLoadTraffic={handleLoadTraffic} />;
   }
 
   // Render Main App
