@@ -3,4 +3,4 @@ export { ClientDetail } from './ClientDetail';
 export { ShareView } from './ShareView';
 export { Login } from './Login';
 export { CreateClientModal } from './CreateClientModal';
-export { TrafficChart, MiniChart } from './Charts';
+export { TrafficChart, MiniChart, timeRangeOptions, type TimeRange } from './Charts';

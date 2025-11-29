@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   LayoutDashboard,
   Globe,
@@ -7,6 +7,7 @@ import {
   Sun,
   Monitor,
   Github,
+  ChevronDown,
 } from 'lucide-react';
 import type { Client, Theme, CreateClientRequest } from './types';
 import {
@@ -47,6 +48,10 @@ const App: React.FC = () => {
   const [toast, setToast] = useState<string | null>(null);
   const [lang, setLang] = useState<Language>(getStoredLanguage());
   const [theme, setTheme] = useState<Theme>('auto');
+  const [showThemeDropdown, setShowThemeDropdown] = useState(false);
+  const [showLangDropdown, setShowLangDropdown] = useState(false);
+  const themeDropdownRef = useRef<HTMLDivElement>(null);
+  const langDropdownRef = useRef<HTMLDivElement>(null);
 
   // Show Toast
   const showToast = useCallback((msg: string) => {
@@ -91,6 +96,21 @@ const App: React.FC = () => {
       root.classList.add(theme);
     }
   }, [theme]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (themeDropdownRef.current && !themeDropdownRef.current.contains(event.target as Node)) {
+        setShowThemeDropdown(false);
+      }
+      if (langDropdownRef.current && !langDropdownRef.current.contains(event.target as Node)) {
+        setShowLangDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Hash Router for Share View
   useEffect(() => {
@@ -182,6 +202,17 @@ const App: React.FC = () => {
     showToast(t('resetSuccess', lang));
   };
 
+  const handleLoadTraffic = async (id: string, hours: number) => {
+    try {
+      const history = await clientApi.getTraffic(id, hours);
+      setClients((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, history } : c))
+      );
+    } catch (error) {
+      console.error('Failed to load traffic:', error);
+    }
+  };
+
   const handleShare = async (id: string) => {
     try {
       const { shareUrl } = await clientApi.getUrls(id);
@@ -193,16 +224,15 @@ const App: React.FC = () => {
   };
 
   // UI Handlers
-  const toggleLanguage = () => {
-    const newLang = lang === 'zh' ? 'en' : 'zh';
+  const handleLanguageChange = (newLang: Language) => {
     setLang(newLang);
     setStoredLanguage(newLang);
+    setShowLangDropdown(false);
   };
 
-  const cycleTheme = () => {
-    if (theme === 'auto') setTheme('light');
-    else if (theme === 'light') setTheme('dark');
-    else setTheme('auto');
+  const handleThemeChange = (newTheme: Theme) => {
+    setTheme(newTheme);
+    setShowThemeDropdown(false);
   };
 
   // Render Login
@@ -230,7 +260,7 @@ const App: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* Toast */}
       {toast && (
-        <div className="fixed top-5 right-5 z-50 bg-blue-600 text-white px-6 py-3 rounded-xl shadow-xl shadow-blue-500/20 animate-fade-in font-medium">
+        <div className="fixed top-5 right-5 z-50 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-xl shadow-blue-500/20 animate-fade-in font-medium">
           {toast}
         </div>
       )}
@@ -245,7 +275,7 @@ const App: React.FC = () => {
               setActiveClientId(null);
             }}
           >
-            <div className="bg-blue-600 p-2 rounded-xl group-hover:scale-105 transition-transform shadow-lg shadow-blue-500/30">
+            <div className="bg-blue-600 p-2 rounded-lg group-hover:scale-105 transition-transform shadow-lg shadow-blue-500/30">
               <LayoutDashboard size={20} className="text-white" />
             </div>
             <h1 className="font-bold text-xl tracking-tight hidden md:block text-gray-900 dark:text-white">
@@ -254,23 +284,72 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
-            <button
-              onClick={cycleTheme}
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors"
-              title={t('theme', lang)}
-            >
-              {theme === 'auto' && <Monitor size={18} />}
-              {theme === 'light' && <Sun size={18} />}
-              {theme === 'dark' && <Moon size={18} />}
-            </button>
+            {/* Theme Dropdown */}
+            <div className="relative" ref={themeDropdownRef}>
+              <button
+                onClick={() => setShowThemeDropdown(!showThemeDropdown)}
+                className="flex items-center gap-1.5 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors"
+                title={t('theme', lang)}
+              >
+                {theme === 'auto' && <Monitor size={18} />}
+                {theme === 'light' && <Sun size={18} />}
+                {theme === 'dark' && <Moon size={18} />}
+                <ChevronDown size={14} className={`transition-transform ${showThemeDropdown ? 'rotate-180' : ''}`} />
+              </button>
+              {showThemeDropdown && (
+                <div className="absolute right-0 mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 z-50">
+                  <button
+                    onClick={() => handleThemeChange('auto')}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${theme === 'auto' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
+                  >
+                    <Monitor size={16} />
+                    {lang === 'zh' ? '跟随系统' : 'Auto'}
+                  </button>
+                  <button
+                    onClick={() => handleThemeChange('light')}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${theme === 'light' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
+                  >
+                    <Sun size={16} />
+                    {lang === 'zh' ? '浅色' : 'Light'}
+                  </button>
+                  <button
+                    onClick={() => handleThemeChange('dark')}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${theme === 'dark' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
+                  >
+                    <Moon size={16} />
+                    {lang === 'zh' ? '深色' : 'Dark'}
+                  </button>
+                </div>
+              )}
+            </div>
 
-            <button
-              onClick={toggleLanguage}
-              className="flex items-center gap-1 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg"
-            >
-              <Globe size={16} />
-              {lang === 'zh' ? 'EN' : '中文'}
-            </button>
+            {/* Language Dropdown */}
+            <div className="relative" ref={langDropdownRef}>
+              <button
+                onClick={() => setShowLangDropdown(!showLangDropdown)}
+                className="flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg"
+              >
+                <Globe size={16} />
+                {lang === 'zh' ? '中文' : 'EN'}
+                <ChevronDown size={14} className={`transition-transform ${showLangDropdown ? 'rotate-180' : ''}`} />
+              </button>
+              {showLangDropdown && (
+                <div className="absolute right-0 mt-1 w-32 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg py-1 z-50">
+                  <button
+                    onClick={() => handleLanguageChange('zh')}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${lang === 'zh' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
+                  >
+                    中文
+                  </button>
+                  <button
+                    onClick={() => handleLanguageChange('en')}
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${lang === 'en' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}
+                  >
+                    English
+                  </button>
+                </div>
+              )}
+            </div>
 
             <button
               onClick={handleLogout}
@@ -308,6 +387,7 @@ const App: React.FC = () => {
               onDelete={handleDeleteClient}
               onShare={handleShare}
               onResetTraffic={handleResetTraffic}
+              onLoadTraffic={handleLoadTraffic}
               lang={lang}
             />
           ) : null}

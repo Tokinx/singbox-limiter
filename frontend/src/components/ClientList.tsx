@@ -38,7 +38,7 @@ export const ClientList: React.FC<ClientListProps> = ({
         </div>
         <button
           onClick={onAdd}
-          className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2 font-medium"
+          className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-lg shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2 font-medium"
         >
           <Plus size={18} />
           {t('newClient', lang)}
@@ -103,10 +103,10 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onSelect, lang }) => {
   return (
     <div
       onClick={() => onSelect(client.id)}
-      className={`bg-white dark:bg-gray-800 rounded-2xl border ${borderColor} p-6 cursor-pointer ${bgHover} hover:shadow-xl transition-all duration-300 group`}
+      className={`bg-white dark:bg-gray-800 rounded-xl border ${borderColor} p-5 cursor-pointer ${bgHover} hover:shadow-lg transition-all duration-300 group`}
     >
       {/* Header */}
-      <div className="flex justify-between items-start mb-5">
+      <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-blue-500 transition-colors">
             {client.name}
@@ -116,7 +116,7 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onSelect, lang }) => {
           </p>
         </div>
         <div
-          className={`${statusColor} bg-gray-50 dark:bg-gray-900/50 p-2 rounded-xl`}
+          className={`${statusColor} bg-gray-50 dark:bg-gray-900/50 p-2 rounded-lg`}
         >
           {healthy ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
         </div>

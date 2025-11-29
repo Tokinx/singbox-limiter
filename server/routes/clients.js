@@ -311,7 +311,14 @@ router.get('/:id/traffic', (req, res) => {
     const hours = parseInt(req.query.hours) || 24;
     const history = getClientTrafficHistory(req.params.id, hours);
 
-    res.json(history);
+    // 转换字段名为 camelCase
+    const formattedHistory = history.map(h => ({
+      timestamp: h.timestamp,
+      upload: h.upload_bytes || 0,
+      download: h.download_bytes || 0,
+    }));
+
+    res.json(formattedHistory);
   } catch (error) {
     console.error('获取流量历史失败:', error);
     res.status(500).json({ error: '获取流量历史失败' });
