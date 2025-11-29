@@ -72,7 +72,7 @@ export function generateHysteria2Config(client) {
     ],
     obfs: {
       type: 'salamander',
-      password: client.uuid
+      password: client.obfs_password || client.uuid  // 兼容旧客户端
     },
     tls: {
       enabled: true,
@@ -167,7 +167,7 @@ export function buildHysteria2Url(client) {
     insecure: '1',
     sni: client.sni,
     obfs: 'salamander',
-    'obfs-password': client.uuid
+    'obfs-password': client.obfs_password || client.uuid  // 兼容旧客户端
   });
 
   const url = `hysteria2://${client.uuid}@${client.server_ip}:${client.hysteria_port}?${params.toString()}#${encodeURIComponent(client.name)}`;

@@ -51,8 +51,20 @@ export function generateSelfSignedCert() {
 }
 
 /**
+ * 将标准 Base64 转换为 URL-safe Base64（无填充）
+ * sing-box 使用 Base64 URL-safe 编码（RFC 4648）
+ */
+function toBase64UrlSafe(base64) {
+  return base64
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+/**
  * 生成 Reality 密钥对
  * 使用 Node.js crypto 模块生成 X25519 密钥对
+ * 输出格式与 `sing-box generate reality-keypair` 一致
  */
 export function generateRealityKeyPair() {
   try {
@@ -69,11 +81,11 @@ export function generateRealityKeyPair() {
     const privateKeyRaw = privateKeyDer.slice(-32);
     const publicKeyRaw = publicKeyDer.slice(-32);
 
-    // 转换为 base64 编码（sing-box 使用标准 base64）
-    const privateKey = privateKeyRaw.toString('base64');
-    const publicKey = publicKeyRaw.toString('base64');
+    // 转换为 Base64 URL-safe 编码（无填充）- 与 sing-box 格式一致
+    const privateKey = toBase64UrlSafe(privateKeyRaw.toString('base64'));
+    const publicKey = toBase64UrlSafe(publicKeyRaw.toString('base64'));
 
-    console.log('✅ Reality 密钥生成成功 (crypto)');
+    console.log('✅ Reality 密钥生成成功 (Base64 URL-safe)');
     return { publicKey, privateKey };
   } catch (error) {
     console.error('❌ Reality 密钥生成失败:', error.message);
@@ -87,6 +99,17 @@ export function generateRealityKeyPair() {
 export function generateShortId() {
   const randomHex = () => Math.floor(Math.random() * 16).toString(16);
   return Array.from({ length: 16 }, randomHex).join('');
+}
+
+/**
+ * 生成 obfs 密码
+ * 用于 Hysteria2 的 salamander 混淆
+ * 生成一个随机的、易于传输的密码字符串
+ */
+export function generateObfsPassword() {
+  // 生成 16 字节随机数据，转换为 Base64 URL-safe
+  const randomBytes = crypto.randomBytes(16);
+  return toBase64UrlSafe(randomBytes.toString('base64'));
 }
 
 // 如果直接运行此脚本，则生成证书

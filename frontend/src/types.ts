@@ -28,6 +28,7 @@ export interface Client {
   sni: string;
   publicKey: string;
   shortId: string;
+  obfsPassword?: string; // Hysteria2 混淆密码
   // 流量历史
   history: TrafficHistory[];
 }
@@ -126,7 +127,8 @@ export const generateRealityUri = (c: Client): string => {
 
 // 生成 Hysteria2 URI
 export const generateHy2Uri = (c: Client): string => {
-  return `hysteria2://${c.uuid}@${c.serverIp}:${c.hysteriaPort}?sni=${c.sni}&insecure=1&obfs=salamander&obfs-password=${c.uuid}#${encodeURIComponent(c.name)}`;
+  const obfsPass = c.obfsPassword || c.uuid; // 兼容旧客户端
+  return `hysteria2://${c.uuid}@${c.serverIp}:${c.hysteriaPort}?sni=${c.sni}&insecure=1&obfs=salamander&obfs-password=${obfsPass}#${encodeURIComponent(c.name)}`;
 };
 
 // 计算剩余流量

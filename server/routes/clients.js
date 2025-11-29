@@ -12,7 +12,8 @@ import {
 } from '../utils/database.js';
 import {
   generateRealityKeyPair,
-  generateShortId
+  generateShortId,
+  generateObfsPassword
 } from '../utils/cert-generator.js';
 import {
   generateSingBoxConfig,
@@ -56,6 +57,7 @@ function toClientResponse(dbClient) {
     publicKey: dbClient.public_key,
     privateKey: dbClient.private_key,
     shortId: dbClient.short_id,
+    obfsPassword: dbClient.obfs_password,
     containerName: dbClient.container_name,
     shareToken: dbClient.share_token,
   };
@@ -148,6 +150,7 @@ router.post('/', async (req, res) => {
     const uuid = randomUUID();
     const { publicKey, privateKey } = generateRealityKeyPair();
     const shortId = generateShortId();
+    const obfsPassword = generateObfsPassword();
     const containerName = `singbox-${clientId}`;
     const shareToken = randomUUID();
 
@@ -168,6 +171,7 @@ router.post('/', async (req, res) => {
       public_key: publicKey,
       private_key: privateKey,
       short_id: shortId,
+      obfs_password: obfsPassword,
       container_name: containerName,
       share_token: shareToken
     };

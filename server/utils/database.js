@@ -41,12 +41,20 @@ export function initDatabase() {
       public_key TEXT NOT NULL,
       private_key TEXT NOT NULL,
       short_id TEXT NOT NULL,
+      obfs_password TEXT,
       container_name TEXT UNIQUE,
       share_token TEXT UNIQUE,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       updated_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // 为旧数据库添加 obfs_password 字段（如果不存在）
+  try {
+    db.exec(`ALTER TABLE clients ADD COLUMN obfs_password TEXT`);
+  } catch (e) {
+    // 列已存在，忽略错误
+  }
 
   // 流量历史记录表
   db.exec(`
@@ -115,11 +123,11 @@ export function createClient(client) {
     INSERT INTO clients (
       id, name, email, uuid, flow, limit_bytes, reset_interval,
       reset_day, expiry_date, server_ip, reality_port, hysteria_port,
-      sni, public_key, private_key, short_id, container_name, share_token
+      sni, public_key, private_key, short_id, obfs_password, container_name, share_token
     ) VALUES (
       @id, @name, @email, @uuid, @flow, @limit_bytes, @reset_interval,
       @reset_day, @expiry_date, @server_ip, @reality_port, @hysteria_port,
-      @sni, @public_key, @private_key, @short_id, @container_name, @share_token
+      @sni, @public_key, @private_key, @short_id, @obfs_password, @container_name, @share_token
     )
   `);
 
