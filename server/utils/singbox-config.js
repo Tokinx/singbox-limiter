@@ -70,6 +70,10 @@ export function generateHysteria2Config(client) {
         password: client.uuid
       }
     ],
+    obfs: {
+      type: 'salamander',
+      password: client.uuid
+    },
     tls: {
       enabled: true,
       server_name: client.sni,
@@ -148,11 +152,10 @@ export function buildRealityUrl(client) {
     fp: 'chrome',
     pbk: client.public_key,
     sid: client.short_id,
-    type: 'tcp',
-    headerType: 'none'
+    type: 'tcp'
   });
 
-  const url = `vless://${client.uuid}@${client.server_ip}:${client.reality_port}?${params.toString()}#SingBox-Reality-${client.name}`;
+  const url = `vless://${client.uuid}@${client.server_ip}:${client.reality_port}?${params.toString()}#${encodeURIComponent(client.name)}`;
   return url;
 }
 
@@ -162,10 +165,12 @@ export function buildRealityUrl(client) {
 export function buildHysteria2Url(client) {
   const params = new URLSearchParams({
     insecure: '1',
-    sni: client.server_ip
+    sni: client.sni,
+    obfs: 'salamander',
+    'obfs-password': client.uuid
   });
 
-  const url = `hysteria2://${client.uuid}@${client.server_ip}:${client.hysteria_port}?${params.toString()}#SingBox-Hysteria2-${client.name}`;
+  const url = `hysteria2://${client.uuid}@${client.server_ip}:${client.hysteria_port}?${params.toString()}#${encodeURIComponent(client.name)}`;
   return url;
 }
 

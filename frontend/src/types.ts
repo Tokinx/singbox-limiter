@@ -86,7 +86,7 @@ export const formatBytes = (bytes: number, decimals = 2): string => {
 
 // 格式化日期
 export const formatDate = (dateString: string | null): string => {
-  if (!dateString) return '永久';
+  if (!dateString) return '长期有效';
   const date = new Date(dateString);
   return date.toLocaleDateString('zh-CN');
 };
@@ -121,12 +121,12 @@ export const getNextResetTime = (c: Client): Date | null => {
 
 // 生成 Reality URI
 export const generateRealityUri = (c: Client): string => {
-  return `vless://${c.uuid}@${c.serverIp}:${c.realityPort}?encryption=none&flow=${c.flow}&security=reality&sni=${c.sni}&fp=chrome&pbk=${c.publicKey}&sid=${c.shortId}&type=tcp&headerType=none#${encodeURIComponent(c.name)}`;
+  return `vless://${c.uuid}@${c.serverIp}:${c.realityPort}?encryption=none&flow=${c.flow}&security=reality&sni=${c.sni}&fp=chrome&pbk=${c.publicKey}&sid=${c.shortId}&type=tcp#${encodeURIComponent(c.name)}`;
 };
 
 // 生成 Hysteria2 URI
 export const generateHy2Uri = (c: Client): string => {
-  return `hysteria2://${c.uuid}@${c.serverIp}:${c.hysteriaPort}?sni=${c.sni}&insecure=1#${encodeURIComponent(c.name)}`;
+  return `hysteria2://${c.uuid}@${c.serverIp}:${c.hysteriaPort}?sni=${c.sni}&insecure=1&obfs=salamander&obfs-password=${c.uuid}#${encodeURIComponent(c.name)}`;
 };
 
 // 计算剩余流量

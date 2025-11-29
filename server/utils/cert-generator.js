@@ -2,6 +2,7 @@ import { execSync } from 'child_process';
 import { existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import crypto from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -51,31 +52,31 @@ export function generateSelfSignedCert() {
 
 /**
  * 生成 Reality 密钥对
- * 使用 sing-box 官方推荐方式生成
+ * 使用 Node.js crypto 模块生成 X25519 密钥对
  */
 export function generateRealityKeyPair() {
   try {
-    // 使用 sing-box generate reality-keypair（通过 Docker）
-    const output = execSync(
-      'docker run --rm ghcr.io/sagernet/sing-box generate reality-keypair',
-      { encoding: 'utf-8', timeout: 30000 }
-    ).trim();
+    // 使用 Node.js crypto 生成 X25519 密钥对
+    const keyPair = crypto.generateKeyPairSync('x25519');
 
-    const privateMatch = output.match(/PrivateKey:\s*(\S+)/);
-    const publicMatch = output.match(/PublicKey:\s*(\S+)/);
+    // 导出原始密钥数据
+    const privateKeyDer = keyPair.privateKey.export({ type: 'pkcs8', format: 'der' });
+    const publicKeyDer = keyPair.publicKey.export({ type: 'spki', format: 'der' });
 
-    if (privateMatch && publicMatch) {
-      console.log('✅ Reality 密钥生成成功 (sing-box)');
-      return {
-        publicKey: publicMatch[1],
-        privateKey: privateMatch[1]
-      };
-    }
+    // X25519 密钥在 DER 格式中的偏移位置
+    // PKCS8 私钥: 前16字节是 header，实际密钥从第16字节开始，长度32字节
+    // SPKI 公钥: 前12字节是 header，实际密钥从第12字节开始，长度32字节
+    const privateKeyRaw = privateKeyDer.slice(-32);
+    const publicKeyRaw = publicKeyDer.slice(-32);
 
-    throw new Error('无法解析 sing-box 输出');
+    // 转换为 base64 编码（sing-box 使用标准 base64）
+    const privateKey = privateKeyRaw.toString('base64');
+    const publicKey = publicKeyRaw.toString('base64');
+
+    console.log('✅ Reality 密钥生成成功 (crypto)');
+    return { publicKey, privateKey };
   } catch (error) {
-    console.error('❌ sing-box 密钥生成失败:', error.message);
-    console.error('请确保 Docker 已安装并运行');
+    console.error('❌ Reality 密钥生成失败:', error.message);
     throw error;
   }
 }
