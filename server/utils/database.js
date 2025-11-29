@@ -195,8 +195,30 @@ export function updateClientTraffic(clientId, uploadBytes, downloadBytes) {
   insertStmt.run(clientId, uploadBytes, downloadBytes, totalBytes);
 }
 
-// 获取客户端流量历史（最近 N 小时）
+// 获取客户端流量历史（最近 N 小时，且仅返回上次重置之后的记录）
 export function getClientTrafficHistory(clientId, hours = 24) {
+  // 先获取客户端的上次重置时间
+  const client = getClientById(clientId);
+  const lastResetDate = client?.last_reset_date;
+
+  // 如果有重置时间，则只返回重置之后的记录
+  if (lastResetDate) {
+    const stmt = db.prepare(`
+      SELECT
+        upload_bytes,
+        download_bytes,
+        total_bytes,
+        timestamp
+      FROM traffic_history
+      WHERE client_id = ?
+        AND datetime(timestamp) >= datetime('now', '-' || ? || ' hours')
+        AND datetime(timestamp) >= datetime(?)
+      ORDER BY timestamp ASC
+    `);
+    return stmt.all(clientId, hours, lastResetDate);
+  }
+
+  // 没有重置记录时，返回时间范围内的所有记录
   const stmt = db.prepare(`
     SELECT
       upload_bytes,
